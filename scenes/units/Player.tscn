@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bv36fipwu7q7x"]
+
+[ext_resource type="PackedScene" uid="uid://cqk87mlrchf2c" path="res://scenes/units/Unit.tscn" id="1_m2mkn"]
+[ext_resource type="Script" uid="uid://rg3x0qvq6gvf" path="res://scripts/units/Player.gd" id="2_qbgln"]
+
+[node name="Player" unique_id=1715206411 instance=ExtResource("1_m2mkn")]
+script = ExtResource("2_qbgln")

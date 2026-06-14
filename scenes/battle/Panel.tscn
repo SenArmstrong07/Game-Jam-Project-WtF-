@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://1loyvaaqolo2"]
+
+[ext_resource type="Script" uid="uid://ddncyhid7va5u" path="res://scripts/battle/Panel.gd" id="1_l3hk6"]
+
+[node name="Node2D" type="Area2D" unique_id=1508594811]
+script = ExtResource("1_l3hk6")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=523473268]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=837684057]
