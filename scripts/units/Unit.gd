@@ -10,7 +10,7 @@ enum DamageType {
 	#just add more types dito, or change the existing ones if you want. ni-AI ko lang sila, but you can use whatever you like.
 	NEUTRAL,    # Standard damage with no special properties
 	INEFFECTIVE, # damage halves (0.5)
-	SUPER_EFFECTIVE $ double damage (2)
+	SUPER_EFFECTIVE # double damage (2)
 }
 
 var team : Team
