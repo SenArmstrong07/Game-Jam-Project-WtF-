@@ -2,7 +2,9 @@
 
 [ext_resource type="Script" uid="uid://cbxyqrfb6aga0" path="res://scripts/units/Unit.gd" id="1_e3b5r"]
 
-[node name="Unit" type="Node2D" unique_id=1715206411]
+[sub_resource type="CircleShape2D" id="CircleShape2D_e3b5r"]
+
+[node name="Unit" type="CharacterBody2D" unique_id=1746116883]
 script = ExtResource("1_e3b5r")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1302790633]
@@ -10,3 +12,6 @@ script = ExtResource("1_e3b5r")
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1045346558]
 
 [node name="Marker2D" type="Marker2D" parent="." unique_id=1638764818]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1589681058]
+shape = SubResource("CircleShape2D_e3b5r")
