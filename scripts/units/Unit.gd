@@ -15,6 +15,7 @@ enum DamageType {
 
 var team : Team
 
+#positions sa grid
 var grid_x : int
 var grid_y : int
 
@@ -24,7 +25,7 @@ var max_hp : int = 100
 var attack_power : int = 10 # Base damage (Expand with weapon types, etc.)
 var attack_range : int = 4  # Grid tiles (Expand mo nalang with what you like)
 var attack_cooldown : float = 1.0  # Seconds
-var attack_damage_type : DamageType = DamageType.NEUTRAL
+var attack_damage_type : DamageType = DamageType.NEUTRAL #Neutral is set as default
 
 # Damage type resistances/weaknesses (list nalang sa array kung anong type ng damage ang effective or ineffective sa unit)
 
