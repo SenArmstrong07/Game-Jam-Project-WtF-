@@ -5,8 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://djdrn1tgj56hi" path="res://scenes/battle/Grid.tscn" id="2_curwf"]
 [ext_resource type="PackedScene" uid="uid://bd000x17iehe0" path="res://scenes/units/player_character.tscn" id="2_g3tu8"]
 [ext_resource type="PackedScene" uid="uid://cqk87mlrchf2c" path="res://scenes/units/Unit.tscn" id="3_g3tu8"]
-[ext_resource type="PackedScene" uid="uid://bx0l221gdwc3i" path="res://scenes/battle/CommonBug.tscn" id="6_1136b"]
-[ext_resource type="Script" path="res://scripts/units/common_bug.gd" id="7_g4sxx"]
+[ext_resource type="PackedScene" uid="uid://bx0l221gdwc3i" path="res://scenes/units/CommonBug.tscn" id="6_1136b"]
 
 [node name="Battlescene" type="Node2D" unique_id=1208126284]
 script = ExtResource("1_sx6bk")
@@ -25,4 +24,3 @@ position = Vector2(1, -64)
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1004523237]
 
 [node name="CommonBug" parent="." unique_id=627844401 instance=ExtResource("6_1136b")]
-script = ExtResource("7_g4sxx")
