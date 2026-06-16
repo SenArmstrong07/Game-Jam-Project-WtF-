@@ -1,4 +1,4 @@
-extends CharacterBody2D
+extends Unit
 
 @onready var camera_2d: Camera2D = $"../Camera2D"
 @onready var anim_player: AnimatedSprite2D = $AnimatedSprite2D
