@@ -38,13 +38,14 @@ func _ready():
 
 
 # Override take_damage function from Unit superclass to implement "1 hit = 1 life" mechanic (PLAYER ONLY)
-func take_damage(amount: int, damage_type: Unit.DamageType = Unit.DamageType.NEUTRAL) -> void:
-    # Check if hit connects (even if "1 hit = 1 life", we could add dodge chance)
-    lives -= 1
-    print("Hit! Lives remaining: ", lives)
-    
-    if lives <= 0:
-        die()
+func take_damage(amount: int, damage_type: Unit.DamageType = Unit.DamageType.NEUTRAL, chip: Chip = null) -> void:
+	# Check if hit connects (even if "1 hit = 1 life", we could add dodge chance)
+	lives -= 1
+	print("Hit! Lives remaining: ", lives)
+	
+	if lives <= 0:
+		die()
+
 
 
 #Converts grid coordinates to pixel position

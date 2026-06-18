@@ -8,14 +8,51 @@ func _init() -> void:
 
 func _initialize_deck() -> void:
 	# Default deck - customize per unit as needed
-	#COMP: Name, dmg_type, power, range, desc (about sa damage type, irerevamp ko pa  usage here)
+	# Chip format: Chip.new(name, power, range, description, effectiveness_map)
 	deck = [
-		Chip.new("Crash Strike", Unit.DamageType.NEUTRAL, 15, 1, "Direct crash attack"),
-		Chip.new("Glitch Wave", Unit.DamageType.INEFFECTIVE, 12, 2, "Mid-range glitch blast"),
-		Chip.new("Corruption", Unit.DamageType.SUPER_EFFECTIVE, 18, 1, "Powerful corrupt strike"),
-		Chip.new("Malware Injection", Unit.DamageType.SUPER_EFFECTIVE, 10, 3, "Long-range malware"),
-		Chip.new("Logic Bomb", Unit.DamageType.NEUTRAL, 14, 2, "Logic error attack"),
-		Chip.new("Overflow Burst", Unit.DamageType.NEUTRAL, 20, 1, "High damage overflow"),
+		Chip.new(
+			"DELETE",
+			15,
+			1,
+			"Direct system crash attack",
+			{"CommonBug": Unit.DamageType.SUPER_EFFECTIVE, "Virus": Unit.DamageType.INEFFECTIVE} #example ng effectiveness mapping (NEEDS NEW ENEMIES)
+		#GANITO NA MAGLAGAY NG TYPE EFFECTIVENESS, WE MAP IT
+		),
+		Chip.new(
+			"Glitch Wave",
+			12,
+			2,
+			"Mid-range glitch blast",
+			{"CommonBug": Unit.DamageType.INEFFECTIVE, "Virus": Unit.DamageType.SUPER_EFFECTIVE}
+		),
+		Chip.new(
+			"Corruption",
+			18,
+			1,
+			"Powerful data corruption strike",
+			{"CommonBug": Unit.DamageType.SUPER_EFFECTIVE, "Virus": Unit.DamageType.SUPER_EFFECTIVE}
+		),
+		Chip.new(
+			"Malware Injection",
+			10,
+			3,
+			"Long-range malware attack",
+			{"CommonBug": Unit.DamageType.NEUTRAL, "Virus": Unit.DamageType.SUPER_EFFECTIVE}
+		),
+		Chip.new(
+			"Logic Bomb",
+			14,
+			2,
+			"Logic error attack",
+			{"CommonBug": Unit.DamageType.SUPER_EFFECTIVE, "Virus": Unit.DamageType.NEUTRAL}
+		),
+		Chip.new(
+			"Overflow Burst",
+			20,
+			1,
+			"High damage buffer overflow",
+			{"CommonBug": Unit.DamageType.INEFFECTIVE, "Virus": Unit.DamageType.NEUTRAL}
+		),
 	]
 
 func draw_hand(hand_size: int = 5) -> Array[Chip]:

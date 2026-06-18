@@ -1,6 +1,25 @@
 extends Node2D
 class_name Battlescene
 
+#
+# Battle scene flow:
+# Preparation Phase:
+# 	Draw phase — Both player and enemy randomly draw 5 chips from their deck
+# Selection phase —
+# 	Player sees chips displayed (you scroll with arrow keys)
+# 	Player presses Enter to select ONE chip
+# 	Enemy AI randomly picks ONE chip
+# 	UI shows — "You selected: DELETE (15 power, super effective vs CommonBug)"
+# Battle Phase (with selected chip):
+# 	The selected chip's stats become the unit's stats for this round:
+# 	attack_power = 15
+# 	attack_range = 1
+# 	offensive_chip_selected = DELETE
+# 	Player moves around the grid in real-time
+# 	When enemy is within range, press a button to attack
+# 	Attack uses the chip's damage type → effectiveness is checked against enemy type
+# 	Attack connects → loops back to Preparation Phase for new chips
+#
 enum BattlePhase {
 	PREPARATION,  # Phase 1: Select chips
 	BATTLE,       # Phase 2: RTS battle
@@ -26,6 +45,8 @@ var player_chip_index: int = 0
 var enemy_chip_index: int = 0
 
 var battle_active: bool = false
+var enemy_attack_timer: float = 0.0
+var enemy_attack_interval: float = 2.0  # Enemy attacks every 2 seconds
 
 signal phase_changed(new_phase: BattlePhase)
 signal player_chip_selected(chip: Chip)
@@ -123,14 +144,10 @@ func _start_battle_phase() -> void:
 	current_phase = BattlePhase.BATTLE
 	phase_changed.emit(current_phase)
 	battle_active = true
+	enemy_attack_timer = 0.0
 	
 	# Apply selected chips to units
-	player.attack_damage_type = player_selected_chip.damage_type
-	player.attack_power = player_selected_chip.power
 	player.attack_range = player_selected_chip.range_tile
-	
-	enemy.attack_damage_type = enemy_selected_chip.damage_type
-	enemy.attack_power = enemy_selected_chip.power
 	enemy.attack_range = enemy_selected_chip.range_tile
 	
 	print("Battle started! Player has: ", player_selected_chip.name)
@@ -154,11 +171,18 @@ func _handle_battle_input() -> void:
 	
 	# Player attacks when in range
 	if Input.is_action_just_pressed("ui_accept"):
-		if player.attack(enemy):
+		if player.attack_with_chip(enemy, player_selected_chip):
 			print("Player used ", player_selected_chip.name)
 			# After attack, enter next round
 			await get_tree().create_timer(1.0).timeout
 			_next_round()
+	
+	# Enemy AI attacking
+	enemy_attack_timer += get_process_delta_time()
+	if enemy_attack_timer >= enemy_attack_interval:
+		enemy_attack_timer = 0.0
+		if enemy.attack_with_chip(player, enemy_selected_chip):
+			print("Enemy used ", enemy_selected_chip.name)
 
 func _next_round() -> void:
 	# Draw new chips and return to preparation phase

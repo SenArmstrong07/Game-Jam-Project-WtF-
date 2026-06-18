@@ -49,11 +49,15 @@ func _process(delta: float) -> void:
 		_attack_cooldown_timer -= delta
 
 #added a damage_type parameter to take_damage so we can apply type multipliers
-func take_damage(amount: int, damage_type: DamageType = DamageType.NEUTRAL) -> void:
+func take_damage(amount: int, damage_type: DamageType = DamageType.NEUTRAL, chip: Chip = null) -> void:
 	# Calculate type multiplier
 	var type_multiplier : float = 1.0
 	
-	if damage_type == DamageType.SUPER_EFFECTIVE:
+	# If chip is provided, use chip's effectiveness against this unit
+	if chip != null:
+		type_multiplier = chip.get_damage_multiplier(self)
+	# Otherwise, fall back to damage_type enum values
+	elif damage_type == DamageType.SUPER_EFFECTIVE:
 		type_multiplier = 2.0  # Super effective - double damage
 	elif damage_type == DamageType.INEFFECTIVE:
 		type_multiplier = 0.5  # Ineffective - half damage
@@ -103,6 +107,34 @@ func attack(target: Unit) -> bool:
 	# Deal damage to target (type multipliers applied in take_damage)
 	target.take_damage(damage, attack_damage_type)
 	print(name + " attacked " + target.name + " for " + str(damage) + " damage")
+	
+	# Reset cooldown
+	_attack_cooldown_timer = attack_cooldown
+	
+	# Emit signal for animations/effects
+	attack_performed.emit(self, target, damage, attack_damage_type)
+	
+	return true
+
+func attack_with_chip(target: Unit, chip: Chip) -> bool:
+	if target == null:
+		print(name + " tried to attack null target")
+		return false
+	
+	if not is_in_range(target):
+		print(name + " is out of range to attack " + target.name)
+		return false
+	
+	if not can_attack():
+		print(name + " is on cooldown")
+		return false
+	
+	# Calculate damage with small variance
+	var damage : int = chip.power + randi_range(-2, 2)  # ±2 variance
+	
+	# Deal damage to target using chip's effectiveness
+	target.take_damage(damage, DamageType.NEUTRAL, chip)
+	print(name + " attacked " + target.name + " with " + chip.name + " for " + str(damage) + " damage")
 	
 	# Reset cooldown
 	_attack_cooldown_timer = attack_cooldown
