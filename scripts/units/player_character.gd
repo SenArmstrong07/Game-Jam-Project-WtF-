@@ -19,6 +19,8 @@ var move_speed := 400.0
 var target_position := Vector2.ZERO
 var move_dir := Vector2i.ZERO
 var last_anim := "Idle"
+var lives: int = 5
+var max_lives: int = 5
 
 func _ready():
 	# placed player
@@ -33,6 +35,17 @@ func _ready():
 	camera_2d.global_position = grid_center
 
 	camera_2d.zoom = Vector2(1.8,1.8)
+
+
+# Override take_damage function from Unit superclass to implement "1 hit = 1 life" mechanic (PLAYER ONLY)
+func take_damage(amount: int, damage_type: Unit.DamageType = Unit.DamageType.NEUTRAL) -> void:
+    # Check if hit connects (even if "1 hit = 1 life", we could add dodge chance)
+    lives -= 1
+    print("Hit! Lives remaining: ", lives)
+    
+    if lives <= 0:
+        die()
+
 
 #Converts grid coordinates to pixel position
 func grid_to_world(cell: Vector2i) -> Vector2:
