@@ -58,13 +58,13 @@ func generate_chunk(pos):
 				pos.y - (height / 2) + y,
 				) * 10
 			# Pick one of our 4 tiles based on altitude
-			var title_idx = int((alt + 10) / 20.0 * 4) % 4  # Maps -10 to 10 range → 0,1,2,3 alt
+			var tile_idx = int((alt + 10) / 20.0 * 4) % 4  # Maps -10 to 10 range → 0,1,2,3 alt
 			var tile_coords = [
 				Vector2i(4, 2),
 				Vector2i(5, 2),
 				Vector2i(6, 2),
 				Vector2i(7, 2)
-			][title_idx]
+			][tile_idx]
 			
 			# Determine which tile to place based on altitude
 			var cell_to_place: Vector2i
