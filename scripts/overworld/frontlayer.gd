@@ -30,14 +30,15 @@ func _ready():
 		return
 
 func _process(delta):
-	var player_tile_pos = local_to_map(player.position) #places the player coords to the tile coordss
+	var player_tile_pos = local_to_map(player.position) #places the player coords to the tile coords
 	
 	# Follow player with camera
 	if camera:
 		camera.global_position = player.global_position
 	
 	generate_chunk(player_tile_pos)
-	
+
+	#unloads chunks pag out of screen na
 	unload_distant_chunks(player_tile_pos)
 	
 func generate_chunk(pos):
@@ -68,8 +69,7 @@ func generate_chunk(pos):
 			# Determine which tile to place based on altitude
 			var cell_to_place: Vector2i
 			if alt < 0:
-				# Sea level / impassable - use a different tile
-				cell_to_place = Vector2i(0, 0)  # Change this to your sea/impassable tile coord
+				cell_to_place = Vector2i(0, 0)  # impassable tile ("sea")
 			else:
 				# Land - use the altitude-based selection
 				cell_to_place = tile_coords
@@ -85,7 +85,7 @@ func clear_chunk(pos):
 		for y in range(height):
 			set_cell(Vector2i(pos.x - (width / 2) + x, pos.y - (height / 2) + y), -1, Vector2i(-1,-1))
 	
-func unload_distant_chunks(player_pos):
+func unload_distant_chunks(player_pos): 
 	var unload_dist = (width * 2) + 1
 	for chunk in loaded_chunks:
 		var dist_to_player = dist(chunk, player_pos)
