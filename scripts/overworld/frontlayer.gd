@@ -1,5 +1,7 @@
 extends TileMapLayer
 
+signal enemy_spawned(enemy: Node2D)
+
 var moisture = FastNoiseLite.new() #x offset
 var temperature = FastNoiseLite.new() #y offset
 var altitude = FastNoiseLite.new() #for oceans and shit
@@ -11,6 +13,12 @@ var height = 64
 @onready var camera: Camera2D = get_parent().get_parent().get_node("Camera2D")
 
 var loaded_chunks = []
+var spawned_enemies = []  # Track spawned enemy positions
+
+# Enemy spawning settings
+var enemy_scene = preload("res://scenes/units/overworld_enemy.tscn")
+var min_distance_between_enemies = 600  # Minimum pixels between enemy spawns
+var spawn_chance_per_tile = 0.00001  # Chance to spawn enemy on each valid tile
 
 
 func _ready():
@@ -68,13 +76,20 @@ func generate_chunk(pos):
 			
 			# Determine which tile to place based on altitude
 			var cell_to_place: Vector2i
+			var is_valid_spawn_tile = false
 			if alt < 0:
 				cell_to_place = Vector2i(0, 0)  # impassable tile ("sea")
 			else:
 				# Land - use the altitude-based selection
 				cell_to_place = tile_coords
+				is_valid_spawn_tile = true  # Valid land tile for enemy spawning
 			
+			var tile_world_pos = map_to_local(Vector2i(pos.x - (width / 2) + x, pos.y - (height / 2) + y))
 			set_cell(Vector2i(pos.x - (width / 2) + x, pos.y - (height / 2) + y), 0, cell_to_place)
+			
+			# Try to spawn enemy on valid tiles
+			if is_valid_spawn_tile and randf() < spawn_chance_per_tile:
+				attempt_spawn_enemy(tile_world_pos)
 			
 			if Vector2(pos.x, pos.y) not in loaded_chunks:
 				loaded_chunks.append(Vector2(pos.x, pos.y))
@@ -97,3 +112,26 @@ func unload_distant_chunks(player_pos):
 func dist(p1, p2):
 	var r = Vector2(p1) - Vector2(p2)
 	return sqrt(r.x ** 2 + r.y **2)
+
+
+func attempt_spawn_enemy(spawn_position: Vector2) -> void:
+	# Check if this position is too close to existing enemies
+	for enemy_pos in spawned_enemies:
+		var distance = spawn_position.distance_to(enemy_pos)
+		if distance < min_distance_between_enemies:
+			return  # Too close to another enemy, don't spawn
+	
+	# Check if position is too close to player
+	if spawn_position.distance_to(player.position) < min_distance_between_enemies:
+		return  # Too close to player, don't spawn
+	
+	# Spawn the enemy
+	var new_enemy = enemy_scene.instantiate()
+	new_enemy.position = spawn_position
+	get_parent().add_child(new_enemy)  # Add to same parent as tilemap
+	spawned_enemies.append(spawn_position)
+	
+	# Emit signal so minimap can create a marker
+	enemy_spawned.emit(new_enemy)
+	
+	print("Enemy spawned at: ", spawn_position)
