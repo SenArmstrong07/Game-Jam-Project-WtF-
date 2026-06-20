@@ -3,7 +3,8 @@ extends Unit
 @onready var anim_player: AnimatedSprite2D = $AnimatedSprite2D
 const EnemyBasicProjectile = preload("res://scenes/Attacks/enemy_basic_projectile.tscn")
 @onready var ProjectileShootPoint: Marker2D = $Marker2D
-@onready var player_character: CharacterBody2D = $"../PlayerCharacter"
+@onready var player_character = $"../PlayerCharacter"
+@onready var battle_scene : Battlescene = $".."
 
 
 const GRID_WIDTH := 4
@@ -11,7 +12,6 @@ const GRID_HEIGHT := 4
 const X_OFFSET := 4 
 const TILE_SIZE := 64
 
-var grid_pos := Vector2i(0, 0) 
 var target_position := Vector2.ZERO
 
 var follow_timer := 0.0
@@ -23,7 +23,10 @@ var move_speed := 200.0
 
 func _ready():
 	position = grid_to_world(grid_pos)
+	grid_x = grid_pos.x
+	grid_y = grid_pos.y
 	target_position = position 
+
 
 func grid_to_world(cell: Vector2i) -> Vector2:
 	var world_grid_x = cell.x + X_OFFSET
@@ -34,6 +37,8 @@ func grid_to_world(cell: Vector2i) -> Vector2:
 	)
 
 func _process(delta):
+	if battle_scene.current_phase != Battlescene.BattlePhase.BATTLE:
+		return
 	shoot_timer += delta
 	follow_timer += delta
 
@@ -61,17 +66,18 @@ func follow_player():
 		grid_pos.y += 1
 	elif player_row < grid_pos.y:
 		grid_pos.y -= 1
+	else:
+		return
 
 	grid_pos.y = clamp(grid_pos.y, 0, GRID_HEIGHT - 1)
 
-	target_position = grid_to_world(grid_pos)
-		
+	grid_x = grid_pos.x
+	grid_y = grid_pos.y
+
+	target_position = grid_to_world(grid_pos)	
 		
 func player_in_front() -> bool:
-	return (
-		player_character.grid_pos.y == grid_pos.y
-		and player_character.global_position.x < global_position.x
-	)
+	return player_character.grid_pos.y == grid_pos.y
 	
 #shoot funtion sets the postion of the projectile with marker2d
 func shoot():
@@ -79,5 +85,7 @@ func shoot():
 
 	projectile.global_position = ProjectileShootPoint.global_position
 	projectile.direction = Vector2.LEFT
+
+	projectile.damage = attack_power
 
 	get_tree().current_scene.add_child(projectile)

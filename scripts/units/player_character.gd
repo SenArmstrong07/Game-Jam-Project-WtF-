@@ -10,8 +10,7 @@ const TILE_SIZE := 64
 const PLAYER_WIDTH := 4
 const PLAYER_HEIGHT := 4
 
-#postion in grid 
-var grid_pos := Vector2i(0, 0)
+
 #anti spam move
 var moving := false
 var move_speed := 400.0
@@ -25,6 +24,8 @@ var max_lives: int = 5
 func _ready():
 	# placed player
 	position = grid_to_world(grid_pos)
+	grid_x = grid_pos.x
+	grid_y = grid_pos.y
 
 	# Safety check for camera
 	if camera_2d == null:
@@ -92,6 +93,10 @@ func _unhandled_input(event):
 	#player movement
 	if new_pos != grid_pos:
 		grid_pos = new_pos
+
+		grid_x = grid_pos.x
+		grid_y = grid_pos.y
+
 		target_position = grid_to_world(grid_pos)
 		moving = true
 
