@@ -7,24 +7,33 @@ enum BattlePhase {
 	END
 }
 
+@onready var enemy_hitpoint: Marker2D = $CommonBug/CommonBugMarker
+@onready var player_muzzle: Marker2D =  $PlayerCharacter/PlayerMarker
 var current_phase: BattlePhase = BattlePhase.PREPARATION
+
+const QUARANTINE_PROJECTILE = preload("uid://ca4tyfdtbm2xw")
+const PATCH_PROJECTILE = preload("uid://sv6571ybegto")
+const DELETE_PROJECTILE = preload("uid://cxcsd36elkqlv")
 
 @onready var grid = $Grid
 @onready var player: Unit = $PlayerCharacter
 @onready var enemy: Unit = $CommonBug
-
+@export var max_selected_chips := 2
 # PLAYER ONLY uses chips now
 var player_deck: ChipDeck
 var player_hand: Array[Chip] = []
 
-var player_selected_chip: Chip = null
+var selected_chips: Array[Chip] = []
+var current_chip_index := 0
 var player_chip_index: int = 0
-
+var turn_locked := false
 var battle_active: bool = false
 
 signal phase_changed(new_phase: BattlePhase)
 signal player_chip_selected(chip: Chip)
 signal battle_ended(winner: Unit)
+var player_attack_locked := false
+@export var player_attack_delay := 0.4
 
 func _ready() -> void:
 	player_deck = ChipDeck.new()
@@ -55,7 +64,8 @@ func _start_preparation_phase() -> void:
 	player_hand = player_deck.draw_hand(5)
 
 	player_chip_index = 0
-	player_selected_chip = null
+	var selected_chips: Array[Chip] = []
+	var current_chip_index := 0
 
 	var chip_names := []
 
@@ -79,13 +89,21 @@ func _handle_preparation_input() -> void:
 
 	# Select chip
 	if Input.is_action_just_pressed("ui_accept"):
-		player_selected_chip = player_hand[player_chip_index]
 
-		print("Selected chip: ", player_selected_chip.name)
+		var chip = player_hand[player_chip_index]
 
-		player_chip_selected.emit(player_selected_chip)
+		# prevent duplicates
+		if selected_chips.has(chip):
+			print("Chip already selected")
+			return
 
-		_start_battle_phase()
+		selected_chips.append(chip)
+		print("Selected: ", chip.name)
+
+		# limit to 2 chips
+		if selected_chips.size() >= max_selected_chips:
+			print("Module selected → starting battle")
+			_start_battle_phase()
 
 # ============================================================
 # BATTLE PHASE
@@ -98,47 +116,130 @@ func _start_battle_phase() -> void:
 	phase_changed.emit(current_phase)
 
 	battle_active = true
+	current_chip_index = 0
 
-	# Apply selected chip stats
-	player.attack_range = player_selected_chip.range_tile
-	player.attack_power = player_selected_chip.power
+	# Apply FIRST chip stats as default combat stats
+	var first_chip := selected_chips[0]
+
+	player.attack_range = first_chip.range_tile
+	player.attack_power = first_chip.power
 
 	print("Battle started!")
-	print("Player chip: ", player_selected_chip.name)
+	print("Selected chips: ")
 
+	for chip in selected_chips:
+		print("- ", chip.name)
+
+	print("First active chip: ", first_chip.name)
 	# Enemy AI now handles: (found in the enemy script)
 	# - movement
 	# - targeting
 	# - shooting projectiles
 
 func _handle_battle_input() -> void:
-	if player_selected_chip == null:
+	if player_attack_locked:
 		return
 
-	# Use selected chip
+	if selected_chips.is_empty():
+		return
+
+	if current_chip_index >= selected_chips.size():
+		return
+
 	if Input.is_action_just_pressed("ui_accept"):
 
-		if player.attack_with_chip(enemy, player_selected_chip):
+		player_attack_locked = true
 
-			print("Player used ", player_selected_chip.name)
+		var chip = selected_chips[current_chip_index]
+
+		use_chip(chip)
+
+		print("Used chip: ", chip.name)
+
+		current_chip_index += 1
+
+		await get_tree().create_timer(player_attack_delay).timeout
+
+		player_attack_locked = false
+
+		if current_chip_index >= selected_chips.size():
+			battle_active = false
 
 			await get_tree().create_timer(1.0).timeout
 
-			if is_instance_valid(enemy):
+			if current_phase != BattlePhase.END:
 				_next_round()
+							
+func use_chip(chip: Chip):
+	match chip.attack_type:
 
+		Chip.AttackType.PROJECTILE:
+			use_delete(chip)
+
+		Chip.AttackType.HOMING:
+			use_patch(chip)
+
+		Chip.AttackType.STUN_PROJECTILE:
+			use_quarantine(chip)
 # ============================================================
 # ROUND MANAGEMENT
 # ============================================================
 
 func _next_round() -> void:
-	if current_phase == BattlePhase.END:
-		return
+	player.movement_locked = false
 
-	player_selected_chip = null
+	selected_chips.clear()
+	current_chip_index = 0
+	player_chip_index = 0
 
 	_start_preparation_phase()
+	
+# ============================================================
+# CHIPS / MOVES
+# ============================================================
 
+func use_delete(chip: Chip):
+	var projectile = DELETE_PROJECTILE.instantiate()
+	get_tree().current_scene.add_child(projectile)
+
+	# spawn at player muzzle
+	projectile.global_position = player_muzzle.global_position
+	projectile.direction = Vector2.RIGHT
+
+	# base damage from chip
+	projectile.damage = chip.power
+
+	# IMPORTANT: pass chip so super effective works later if needed
+	projectile.chip = chip
+
+	print("DELETE used for ", chip.power, " base damage")
+	
+func use_patch(chip: Chip):
+	var projectile = PATCH_PROJECTILE.instantiate()
+	get_tree().current_scene.add_child(projectile)
+
+	projectile.global_position = player_muzzle.global_position
+	projectile.target = enemy
+
+	projectile.damage = chip.power
+	projectile.chip = chip
+
+	print("PATCH used")
+
+func use_quarantine(chip: Chip):
+	var projectile = QUARANTINE_PROJECTILE.instantiate()
+	get_tree().current_scene.add_child(projectile)
+
+	projectile.global_position = player_muzzle.global_position
+	projectile.direction = Vector2.RIGHT
+
+	projectile.speed = 900.0
+	projectile.damage = chip.power
+	projectile.stun_duration = 2.0
+	projectile.chip = chip
+
+	print("QUARANTINE used")
+		
 # ============================================================
 # DEATH / END BATTLE
 # ============================================================
@@ -147,24 +248,21 @@ func _on_unit_died(unit: Unit) -> void:
 	if current_phase == BattlePhase.END:
 		return
 
-	battle_active = false
 	current_phase = BattlePhase.END
+	battle_active = false
 
 	print(unit.name, " died!")
 
-	# stop the game
-	for child in get_children():
-		if child.has_method("set_process"):
-			child.set_process(false)
-		if child.has_method("set_physics_process"):
-			child.set_physics_process(false)
+	var winner: Unit
 
-	# restart on player death
 	if unit == player:
-		await get_tree().create_timer(1.0).timeout
-		get_tree().reload_current_scene()
-		return
+		winner = enemy
+		print("Enemy wins!")
+	else:
+		winner = player
+		print("Player wins!")
 
-	var winner = enemy
-	print("Winner: ", winner.name)
 	battle_ended.emit(winner)
+
+	await get_tree().create_timer(1.0).timeout
+	get_tree().reload_current_scene()

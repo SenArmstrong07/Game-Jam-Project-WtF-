@@ -1,21 +1,31 @@
 extends Resource
 class_name Chip
 
+enum AttackType {
+	PROJECTILE,
+	MELEE,
+	HOMING,
+	STUN_PROJECTILE
+}
+
 @export var name: String
 @export var power: int = 10
 @export var range_tile: int = 1
 @export var description: String = ""
+@export var attack_type: AttackType
+
 
 # Map enemy type (class name) to effectiveness level
 # Example: {"CommonBug": Unit.DamageType.SUPER_EFFECTIVE, "Virus": Unit.DamageType.INEFFECTIVE}
 var effectiveness_map: Dictionary = {}
 
 func _init(p_name: String = "", p_power: int = 10, p_range: int = 1, 
-		   p_description: String = "", p_effectiveness_map: Dictionary = {}) -> void:
+		   p_description: String = "", p_attack_type: AttackType = AttackType.PROJECTILE , p_effectiveness_map: Dictionary = {}) -> void:
 	name = p_name
 	power = p_power
 	range_tile = p_range
 	description = p_description
+	attack_type = p_attack_type
 	effectiveness_map = p_effectiveness_map.duplicate()
 
 # Get effectiveness against a specific enemy type

@@ -124,7 +124,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_f2brt")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Idle",
 "speed": 6.0
 }, {
@@ -159,7 +159,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_cdhpo")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Move",
 "speed": 6.0
 }]
@@ -181,5 +181,5 @@ flip_h = true
 position = Vector2(-1, -28)
 shape = SubResource("CapsuleShape2D_73l8x")
 
-[node name="Marker2D" type="Marker2D" parent="." unique_id=241895800]
+[node name="CommonBugMarker" type="Marker2D" parent="." unique_id=241895800]
 position = Vector2(-39, -49)
