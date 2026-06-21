@@ -11,6 +11,7 @@ enum Team {
 
 var team: Team
 var is_dead: bool = false
+var action_locked := false
 # ============================================================
 # GRID POSITION (IMPORTANT: SINGLE SOURCE OF TRUTH)
 # ============================================================
@@ -62,6 +63,12 @@ signal unit_died(unit: Unit)
 func _process(delta: float) -> void:
 	if _attack_cooldown_timer > 0.0:
 		_attack_cooldown_timer -= delta
+		
+func lock_actions():
+	action_locked = true
+
+func unlock_actions():
+	action_locked = false
 
 # ============================================================
 # DAMAGE SYSTEM
@@ -81,6 +88,10 @@ func take_damage(amount: int, damage_type: DamageType = DamageType.NEUTRAL, chip
 
 	var final_damage: int = int(amount * multiplier)
 	hp -= final_damage
+	
+	print(name, " took ", final_damage)
+	print(name, " HP after: ", hp)
+
 
 	if hp <= 0:
 		hp = 0
@@ -112,11 +123,12 @@ func attack_with_chip(target: Unit, chip: Chip) -> bool:
 		return false
 
 	if not is_in_range(target):
+		print("OUT OF RANGE")
 		return false
 
 	if not can_attack():
 		return false
-
+	
 	var damage: int = chip.power + randi_range(-2, 2)
 
 	target.take_damage(damage, DamageType.NEUTRAL, chip)

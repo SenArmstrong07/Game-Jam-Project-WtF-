@@ -2,6 +2,8 @@ extends Unit
 
 @onready var camera_2d: Camera2D = $"../Camera2D"
 @onready var anim_player: AnimatedSprite2D = $AnimatedSprite2D
+const DELETE_PROJECTILE = preload("uid://cxcsd36elkqlv")
+@onready var battle_scene: Battlescene = $".."
 
 const GRID_WIDTH := 8
 const GRID_HEIGHT := 4
@@ -20,9 +22,12 @@ var move_dir := Vector2i.ZERO
 var last_anim := "Idle"
 var lives: int = 5
 var max_lives: int = 5
+var facing: Vector2i = Vector2i.RIGHT
+var movement_locked := false
 
 func _ready():
 	# placed player
+	grid_pos = Vector2i(1, 2)
 	position = grid_to_world(grid_pos)
 	grid_x = grid_pos.x
 	grid_y = grid_pos.y
@@ -65,6 +70,11 @@ func grid_to_world(cell: Vector2i) -> Vector2:
 
 #player controls
 func _unhandled_input(event):
+	if battle_scene.current_phase != Battlescene.BattlePhase.BATTLE:
+		return
+	if movement_locked:
+		return
+		
 	if moving:
 		return
 
@@ -72,16 +82,16 @@ func _unhandled_input(event):
 
 	if event.is_action_pressed("ui_right"):
 		move_dir = Vector2i(1, 0)
-		last_anim = "Move_right"
+		facing = Vector2i.RIGHT
 	elif event.is_action_pressed("ui_left"):
 		move_dir = Vector2i(-1, 0)
-		last_anim = "Move_left"
+		facing = Vector2i.LEFT
 	elif event.is_action_pressed("ui_down"):
 		move_dir = Vector2i(0, 1)
-		last_anim = "Move_Down"
+		facing = Vector2i.DOWN
 	elif event.is_action_pressed("ui_up"):
 		move_dir = Vector2i(0, -1)
-		last_anim = "Move_up"
+		facing = Vector2i.UP
 
 	if move_dir == Vector2i.ZERO:
 		return
