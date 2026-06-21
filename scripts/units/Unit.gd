@@ -1,150 +1,169 @@
 extends CharacterBody2D
 class_name Unit
 
+# ============================================================
+# TEAM
+# ============================================================
 enum Team {
 	PLAYER,
 	ENEMY
 }
 
+var team: Team
+var is_dead: bool = false
+# ============================================================
+# GRID POSITION (IMPORTANT: SINGLE SOURCE OF TRUTH)
+# ============================================================
+var grid_pos: Vector2i = Vector2i.ZERO
+var grid_x: int = 0
+var grid_y: int = 0
+
+func set_grid_pos(pos: Vector2i) -> void:
+	grid_pos = pos
+	grid_x = pos.x
+	grid_y = pos.y
+
+# ============================================================
+# STATS
+# ============================================================
+var hp: int = 100
+var max_hp: int = 100
+
+var attack_power: int = 10
+var attack_range: int = 4
+var attack_cooldown: float = 1.0
+var attack_damage_type: DamageType = DamageType.NEUTRAL
+
+var dmg_eff: Array[DamageType] = []
+
+# ============================================================
+# DAMAGE TYPES
+# ============================================================
 enum DamageType {
-	#just add more types dito, or change the existing ones if you want. ni-AI ko lang sila, but you can use whatever you like.
-	NEUTRAL,    # Standard damage with no special properties
-	INEFFECTIVE, # damage halves (0.5)
-	SUPER_EFFECTIVE # double damage (2)
+	NEUTRAL,
+	INEFFECTIVE,
+	SUPER_EFFECTIVE
 }
 
-var team : Team
+# ============================================================
+# COOLDOWN
+# ============================================================
+var _attack_cooldown_timer: float = 0.0
 
-#positions sa grid
-var grid_x : int
-var grid_y : int
-
-var hp : int = 100
-var max_hp : int = 100
-
-var attack_power : int = 10 # Base damage (Expand with weapon types, etc.)
-var attack_range : int = 4  # Grid tiles (Expand mo nalang with what you like)
-var attack_cooldown : float = 1.0  # Seconds
-var attack_damage_type : DamageType = DamageType.NEUTRAL #Neutral is set as default
-
-# Damage type resistances/weaknesses (list nalang sa array kung anong type ng damage ang effective or ineffective sa unit)
-
-var dmg_eff : Array[DamageType] = []  # DMG Type indicator
-
-#EXAMPLE USAGE:
-# In Enemy._ready()
-#
-
-# When attacking
-# attack_damage_type = Unit.DamageType.MALWARE
-
-
-var _attack_cooldown_timer : float = 0.0 #spam prevention
-
+# ============================================================
+# SIGNALS
+# ============================================================
 signal attack_performed(attacker: Unit, target: Unit, damage: int, damage_type: DamageType)
 signal unit_died(unit: Unit)
 
+# ============================================================
+# PROCESS (COOLDOWN TICK)
+# ============================================================
 func _process(delta: float) -> void:
-	if _attack_cooldown_timer > 0:
+	if _attack_cooldown_timer > 0.0:
 		_attack_cooldown_timer -= delta
 
-#added a damage_type parameter to take_damage so we can apply type multipliers
+# ============================================================
+# DAMAGE SYSTEM
+# ============================================================
 func take_damage(amount: int, damage_type: DamageType = DamageType.NEUTRAL, chip: Chip = null) -> void:
-	# Calculate type multiplier
-	var type_multiplier : float = 1.0
-	
-	# If chip is provided, use chip's effectiveness against this unit
-	if chip != null:
-		type_multiplier = chip.get_damage_multiplier(self)
-	# Otherwise, fall back to damage_type enum values
-	elif damage_type == DamageType.SUPER_EFFECTIVE:
-		type_multiplier = 2.0  # Super effective - double damage
-	elif damage_type == DamageType.INEFFECTIVE:
-		type_multiplier = 0.5  # Ineffective - half damage
-	
-	var final_damage : int = int(amount * type_multiplier)
-	hp -= final_damage
-	
-	var type_text : String = ""
-	if type_multiplier == 2.0:
-		type_text = " (SUPER EFFECTIVE!)"
-	elif type_multiplier == 0.5:
-		type_text = " (ineffective)"
-	
-	print(name + " took " + str(final_damage) + " damage" + type_text)
-	
 	if hp <= 0:
+		return # ignore all further damage
+
+	var multiplier: float = 1.0
+
+	if chip != null:
+		multiplier = chip.get_damage_multiplier(self)
+	elif damage_type == DamageType.SUPER_EFFECTIVE:
+		multiplier = 2.0
+	elif damage_type == DamageType.INEFFECTIVE:
+		multiplier = 0.5
+
+	var final_damage: int = int(amount * multiplier)
+	hp -= final_damage
+
+	if hp <= 0:
+		hp = 0
 		die()
 
+# ============================================================
+# HEALING
+# ============================================================
 func restore_hp(amount: int) -> void:
 	hp = min(hp + amount, max_hp)
 
+# ============================================================
+# COMBAT HELPERS
+# ============================================================
 func can_attack() -> bool:
-	return _attack_cooldown_timer <= 0
+	return _attack_cooldown_timer <= 0.0
 
 func get_distance_to(target: Unit) -> int:
 	return maxi(abs(grid_x - target.grid_x), abs(grid_y - target.grid_y))
 
-func is_in_range(target: Unit) -> bool: #validates grid distance to target before attacking
+func is_in_range(target: Unit) -> bool:
 	return get_distance_to(target) <= attack_range
 
-func attack(target: Unit) -> bool:
-	if target == null:
-		print(name + " tried to attack null target")
-		return false
-	
-	if not is_in_range(target):
-		print(name + " is out of range to attack " + target.name)
-		return false
-	
-	if not can_attack():
-		print(name + " is on cooldown")
-		return false
-	
-	# Calculate damage with small variance
-	var damage : int = attack_power + randi_range(-2, 2)  # ±2 variance
-	
-	# Deal damage to target (type multipliers applied in take_damage)
-	target.take_damage(damage, attack_damage_type)
-	print(name + " attacked " + target.name + " for " + str(damage) + " damage")
-	
-	# Reset cooldown
-	_attack_cooldown_timer = attack_cooldown
-	
-	# Emit signal for animations/effects
-	attack_performed.emit(self, target, damage, attack_damage_type)
-	
-	return true
-
+# ============================================================
+# CHIP ATTACK (PLAYER SYSTEM)
+# ============================================================
 func attack_with_chip(target: Unit, chip: Chip) -> bool:
 	if target == null:
-		print(name + " tried to attack null target")
 		return false
-	
+
 	if not is_in_range(target):
-		print(name + " is out of range to attack " + target.name)
 		return false
-	
+
 	if not can_attack():
-		print(name + " is on cooldown")
 		return false
-	
-	# Calculate damage with small variance
-	var damage : int = chip.power + randi_range(-2, 2)  # ±2 variance
-	
-	# Deal damage to target using chip's effectiveness
+
+	var damage: int = chip.power + randi_range(-2, 2)
+
 	target.take_damage(damage, DamageType.NEUTRAL, chip)
-	print(name + " attacked " + target.name + " with " + chip.name + " for " + str(damage) + " damage")
-	
-	# Reset cooldown
+
 	_attack_cooldown_timer = attack_cooldown
-	
-	# Emit signal for animations/effects
+
 	attack_performed.emit(self, target, damage, attack_damage_type)
-	
+
+	print(name + " used chip " + chip.name + " for " + str(damage))
+
 	return true
 
+# ============================================================
+# BASIC ATTACK (OPTIONAL / FUTURE USE)
+# ============================================================
+func attack(target: Unit) -> bool:
+	if target == null:
+		return false
+
+	if not is_in_range(target):
+		return false
+
+	if not can_attack():
+		return false
+
+	var damage: int = attack_power + randi_range(-2, 2)
+
+	target.take_damage(damage, attack_damage_type)
+
+	_attack_cooldown_timer = attack_cooldown
+
+	attack_performed.emit(self, target, damage, attack_damage_type)
+
+	return true
+
+# ============================================================
+# DEATH
+# ============================================================
 func die() -> void:
+	if is_dead:
+		return
+
+	is_dead = true
+	hp = 0
+
 	print(name + " died")
 	unit_died.emit(self)
-	queue_free()
+
+	set_process(false)
+	set_physics_process(false)

@@ -4,9 +4,11 @@
 [ext_resource type="Texture2D" uid="uid://d2ynm620k0uq4" path="res://icon.svg" id="2_ibsax"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k8vgc"]
-size = Vector2(14, 2.5)
+size = Vector2(18, 8)
 
 [node name="EnemyBasicProjectile" type="Area2D" unique_id=828435834]
+collision_layer = 2
+collision_mask = 2
 script = ExtResource("1_evgu3")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2124875398]
@@ -15,7 +17,7 @@ scale = Vector2(0.109375, 0.01953125)
 texture = ExtResource("2_ibsax")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1778585215]
-position = Vector2(0, -1.75)
+position = Vector2(0, -2)
 shape = SubResource("RectangleShape2D_k8vgc")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=789162316]
