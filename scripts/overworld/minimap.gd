@@ -10,6 +10,7 @@ var markers = []
 var player: Node2D
 var tracked_enemies: Dictionary = {}  # Dictionary to track which enemies have markers
 var frontlayer: TileMapLayer
+var marker_layer: Control  # Layer above minimap for markers to render on top
 
 # Minimap circle clamping
 var minimap_center = Vector2.ZERO  # Updated each frame to camera position
@@ -39,6 +40,21 @@ func _ready() -> void:
 	if minimap_cam:
 		minimap_cam.enabled = true
 		minimap_cam.zoom = Vector2(0.5, 0.5)  # Zoom out to see more terrain
+	
+	# Create marker layer above the minimap to render markers on top of white border
+	marker_layer = Control.new()
+	marker_layer.name = "MarkerLayer"
+	marker_layer.anchors_preset = Control.PRESET_BOTTOM_RIGHT
+	marker_layer.anchor_left = 1.0
+	marker_layer.anchor_top = 1.0
+	marker_layer.anchor_right = 1.0
+	marker_layer.anchor_bottom = 1.0
+	marker_layer.offset_left = -192.0
+	marker_layer.offset_top = -192.0
+	marker_layer.size = Vector2(192, 192)
+	marker_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(marker_layer)
+	move_child(marker_layer, get_child_count() - 1)  # Move to top layer
 
 func _physics_process(delta: float) -> void:
 	if player:
@@ -72,7 +88,8 @@ func create_marker_for_enemy(enemy: Node2D) -> Sprite2D:
 	# Set initial position immediately to avoid visual glitch
 	marker.update_position(enemy.position)
 	
-	map_markers.add_child(marker)
+	# Add to marker layer (above minimap) instead of inside viewport
+	marker_layer.add_child(marker)
 	
 	# Connect death signal if it exists
 	if enemy.has_signal("died"):

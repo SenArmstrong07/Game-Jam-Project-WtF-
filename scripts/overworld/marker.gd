@@ -39,20 +39,28 @@ func _process(delta: float) -> void:
 		var viewport_pixel_offset = relative_to_camera * minimap_cam.zoom.x
 		var distance_from_center = viewport_pixel_offset.length()
 		
+		# Minimap viewport center and screen position
+		var viewport_center = Vector2(96, 96)
+		var minimap_screen_pos = get_tree().root.get_visible_rect().size - Vector2(192, 192)  # Bottom-right corner
+		
 		# Clamp to minimap circle if outside radius
 		if distance_from_center > minimap_radius:
 			# Outside circle - clamp to edge
 			var direction = viewport_pixel_offset.normalized()
 			var clamped_viewport_offset = direction * minimap_radius
 			var clamped_world_offset = clamped_viewport_offset / minimap_cam.zoom.x
-			global_position = camera_pos + clamped_world_offset
+			
+			# Convert to screen position
+			var viewport_pos = viewport_center + clamped_viewport_offset
+			global_position = minimap_screen_pos + viewport_pos
 			
 			# Rotate marker to point toward enemy
 			rotation = direction.angle()
 			scale = Vector2.ONE * max_marker_scale
 		else:
 			# Inside circle - show at actual enemy position
-			global_position = enemy_pos
+			var viewport_pos = viewport_center + viewport_pixel_offset
+			global_position = minimap_screen_pos + viewport_pos
 			rotation = 0
 			
 			# Scale based on proximity - closer = smaller, farther = larger

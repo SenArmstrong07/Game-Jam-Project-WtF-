@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://gdy374obviou"]
 
+[ext_resource type="Texture2D" uid="uid://vuxv5suisebv" path="res://assets/ui/enemy_marker.png" id="1_r65ih"]
 [ext_resource type="Script" uid="uid://dsdytcn8ig2yx" path="res://scripts/overworld/marker.gd" id="1_swsdu"]
 
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_7nxk2"]
-size = Vector2(50, 50)
-
 [node name="Marker" type="Sprite2D" unique_id=432534075]
-texture = SubResource("PlaceholderTexture2D_7nxk2")
+position = Vector2(3.8146973e-06, 1.9073486e-06)
+scale = Vector2(4.8437495, 4.5)
+texture = ExtResource("1_r65ih")
 script = ExtResource("1_swsdu")
