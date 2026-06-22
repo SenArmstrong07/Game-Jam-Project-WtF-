@@ -4,6 +4,7 @@ extends Unit
 @onready var anim_player: AnimatedSprite2D = $AnimatedSprite2D
 const DELETE_PROJECTILE = preload("uid://cxcsd36elkqlv")
 @onready var battle_scene: Battlescene = $".."
+@export var hurt_duration := 0.2
 
 const GRID_WIDTH := 8
 const GRID_HEIGHT := 4
@@ -53,6 +54,8 @@ func _ready():
 func take_damage(amount: int, damage_type: Unit.DamageType = Unit.DamageType.NEUTRAL, chip: Chip = null) -> void:
 	# Check if hit connects (even if "1 hit = 1 life", we could add dodge chance)
 	lives -= 1
+	play_hurt()
+
 	print("Hit! Lives remaining: ", lives)
 	
 	if lives <= 0:
@@ -145,3 +148,21 @@ func update_animation(input_dir: Vector2):
 			anim_player.play("Move_down")
 		else:
 			anim_player.play("Move_up")
+			
+func play_hurt():
+	if is_hurt or is_dead:
+		return
+
+	is_hurt = true
+	movement_locked = true
+
+	anim_player.modulate = Color(1, 0.3, 0.3)
+	anim_player.play("Hurt")
+
+	await get_tree().create_timer(hurt_duration).timeout
+
+	anim_player.modulate = Color.WHITE
+	anim_player.play("Idle")
+
+	movement_locked = false
+	is_hurt = false

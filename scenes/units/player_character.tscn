@@ -5,6 +5,14 @@
 [ext_resource type="Texture2D" uid="uid://bxrjt88sjgfjx" path="res://assets/characters/MeGaMan/Reploid_Pack1_Free/Animations/MainCharacter/Character_Jump_RP1 (40x40).png" id="3_akqby"]
 [ext_resource type="Texture2D" uid="uid://djnqu4x7xr2bn" path="res://assets/characters/MeGaMan/Reploid_Pack1_Free/Animations/MainCharacter/Character_Run_RP1 (40x40).png" id="4_4c3tr"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_akqby"]
+atlas = ExtResource("3_akqby")
+region = Rect2(80, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4c3tr"]
+atlas = ExtResource("3_akqby")
+region = Rect2(40, 0, 40, 40)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_bt3kd"]
 atlas = ExtResource("2_4c3tr")
 region = Rect2(0, 0, 40, 40)
@@ -91,6 +99,17 @@ region = Rect2(0, 0, 40, 40)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_tvdtv"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_akqby")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4c3tr")
+}],
+"loop": 1,
+"name": &"Hurt",
+"speed": 8.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_bt3kd")
@@ -192,8 +211,8 @@ script = ExtResource("1_53vxl")
 position = Vector2(-2.0000005, -38.000004)
 scale = Vector2(1.7, 1.875)
 sprite_frames = SubResource("SpriteFrames_tvdtv")
-animation = &"Idle"
-frame_progress = 0.6058034
+animation = &"Hurt"
+frame_progress = 0.6251581
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=303944798]
 position = Vector2(0, -35)
