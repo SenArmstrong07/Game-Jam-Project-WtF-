@@ -15,7 +15,7 @@ var height = 64
 var tile_size = 64  # Pixel size of each tile
 
 # World bounds
-var world_bounds = 5  # ±5 chunks = 11x11 chunks total (4,096x4,096 tiles)
+var world_bounds = 1  # ±5 chunks = 11x11 chunks total (4,096x4,096 tiles)
 var is_world_ready = false
 
 @onready var player = get_parent().get_parent().get_node("OverworldPlayer")
@@ -27,7 +27,7 @@ var spawned_enemies = []  # Track spawned enemy positions
 # Enemy spawning settings
 var enemy_scene = preload("res://scenes/units/overworld_enemy.tscn")
 var min_distance_between_enemies = 700  # Minimum pixels between enemy spawns
-var spawn_chance_per_tile = 0.0001  # Chance to spawn enemy on each valid tile
+var spawn_chance_per_tile = 0.001  # Chance to spawn enemy on each valid tile
 
 
 func _ready():

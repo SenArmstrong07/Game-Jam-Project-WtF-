@@ -2,10 +2,10 @@ extends Sprite2D
 
 var zoom_factor = 8
 var enemy: Node2D = null
+var minimap_script: Node = null  # Reference to minimap.gd
 
 # Minimap constants
-var minimap_center = Vector2(96, 96)  # Center of 192x192 viewport
-var minimap_radius = 96  # Radius of circular minimap
+var minimap_radius = 96  # Radius of circular minimap in pixels
 var max_marker_scale = 1.0  # Scale when at minimap edge
 var min_marker_scale = 0.4  # Scale when at center
 var world_render_distance = 2000  # Distance at which marker reaches max size
@@ -20,36 +20,44 @@ func delete_marker():
 	call_deferred("queue_free")
 
 func _ready() -> void:
-	pass
+	# Get reference to minimap script to access camera and player
+	var minimap_node = get_tree().root.get_child(0).get_node_or_null("Minimap")
+	if minimap_node:
+		minimap_script = minimap_node
 
 func _process(delta: float) -> void:
 	# Continuously update marker position based on enemy position
-	if enemy:
-		update_position(enemy.position)
-		# var scaled_pos = enemy.position / zoom_factor
-		# var to_enemy = scaled_pos - minimap_center
-		# var distance = to_enemy.length()
+	if enemy and minimap_script:
+		var minimap_cam = minimap_script.minimap_cam
+		var camera_pos = minimap_script.player.position / zoom_factor
+		var enemy_pos = enemy.position / zoom_factor
 		
-		# # Check if outside the minimap circle
-		# if distance > minimap_radius:
-		# 	# Outside circle - clamp to edge and scale based on distance
-		# 	var direction = to_enemy.normalized()
-		# 	global_position = minimap_center + direction * minimap_radius
+		# Position relative to camera in minimap world space
+		var relative_to_camera = enemy_pos - camera_pos
+		
+		# Convert to viewport pixel space using camera zoom
+		var viewport_pixel_offset = relative_to_camera * minimap_cam.zoom.x
+		var distance_from_center = viewport_pixel_offset.length()
+		
+		# Clamp to minimap circle if outside radius
+		if distance_from_center > minimap_radius:
+			# Outside circle - clamp to edge
+			var direction = viewport_pixel_offset.normalized()
+			var clamped_viewport_offset = direction * minimap_radius
+			var clamped_world_offset = clamped_viewport_offset / minimap_cam.zoom.x
+			global_position = camera_pos + clamped_world_offset
 			
-		# 	# Rotate marker to point toward enemy
-		# 	rotation = direction.angle()
+			# Rotate marker to point toward enemy
+			rotation = direction.angle()
+			scale = Vector2.ONE * max_marker_scale
+		else:
+			# Inside circle - show at actual enemy position
+			global_position = enemy_pos
+			rotation = 0
 			
-		# 	# Scale marker based on world distance
-		# 	# Markers at the edge are larger (indicating far enemies)
-		# 	scale = Vector2.ONE * max_marker_scale
-		# else:
-		# 	# Inside circle - show at actual position with distance-based scaling
-		# 	global_position = scaled_pos
-		# 	rotation = 0
-			
-		# 	# Scale based on proximity - closer = smaller, farther = larger
-		# 	var world_distance = enemy.position.distance_to(get_tree().root.get_child(0).get_node("OverworldPlayer").position)
-		# 	var proximity_scale = clamp(1.0 - (world_distance / world_render_distance), min_marker_scale, max_marker_scale)
-		# 	scale = Vector2.ONE * proximity_scale
+			# Scale based on proximity - closer = smaller, farther = larger
+			var world_distance = enemy.position.distance_to(minimap_script.player.position)
+			var proximity_scale = clamp(1.0 - (world_distance / world_render_distance), min_marker_scale, max_marker_scale)
+			scale = Vector2.ONE * proximity_scale
 
 		

@@ -6,18 +6,23 @@ extends CanvasLayer
 @onready var marker_scene = preload("res://scenes/overworld/Marker.tscn")
 
 var zoom_factor = 8
+var markers = []
 var player: Node2D
 var tracked_enemies: Dictionary = {}  # Dictionary to track which enemies have markers
 var frontlayer: TileMapLayer
+
+# Minimap circle clamping
+var minimap_center = Vector2.ZERO  # Updated each frame to camera position
+var minimap_radius = 96  # Radius of circular minimap in pixels
 
 # Terrain rendering
 var terrain_tiles: Dictionary = {}  # Store rendered terrain tiles
 var tile_size = 64  # Match the tilemap tile size
 var tile_colors = {
-	0: Color(0.2, 0.5, 0.8),  # Water (blue)
-	1: Color(0.3, 0.7, 0.3),  # Land type 1 (green)
-	2: Color(0.4, 0.75, 0.35), # Land type 2 (light green)
-	3: Color(0.5, 0.8, 0.4),  # Land type 3 (lighter green)
+	0: Color(0.783, 0.281, 0.469, 1.0),  # Water (blue)
+	1: Color(0.527, 0.55, 0.957, 1.0),  # Land type 1 (green)
+	2: Color(0.21, 0.745, 0.689, 1.0), # Land type 2 (light green)
+	3: Color(0.875, 0.671, 0.295, 1.0),  # Land type 3 (lighter green)
 }
 
 # Called when the node enters the scene tree for the first time.
@@ -38,6 +43,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if player:
 		minimap_cam.position = player.position / zoom_factor
+		minimap_center = player.position / zoom_factor  # Update center to camera position
 		
 		# Ensure camera is enabled
 		if minimap_cam:
@@ -53,11 +59,11 @@ func _process(delta: float) -> void:
 
 func _on_enemy_spawned(enemy: Node2D) -> void:
 	# Create marker when enemy is spawned
-	create_marker_for_enemy(enemy)
-	tracked_enemies[enemy] = true
+	var marker = create_marker_for_enemy(enemy)
+	tracked_enemies[enemy] = marker
 
 
-func create_marker_for_enemy(enemy: Node2D) -> void:
+func create_marker_for_enemy(enemy: Node2D) -> Sprite2D:
 	var marker = marker_scene.instantiate()
 	
 	# Link marker to enemy for continuous position updates
@@ -72,6 +78,8 @@ func create_marker_for_enemy(enemy: Node2D) -> void:
 	if enemy.has_signal("died"):
 		enemy.died.connect(marker.delete_marker)
 		enemy.died.connect(func(): tracked_enemies.erase(enemy))
+	
+	return marker
 
 
 func render_nearby_terrain_chunks() -> void:
