@@ -223,7 +223,9 @@ func apply_stun(duration: float):
 
 func play_move_animation(old_pos: Vector2i, new_pos: Vector2i):
 	var delta = new_pos - old_pos
-
+	if is_hurt:
+		return
+		
 	if delta.x > 0:
 		anim_player.play("Right")
 	elif delta.x < 0:
@@ -234,3 +236,9 @@ func play_move_animation(old_pos: Vector2i, new_pos: Vector2i):
 		anim_player.play("Up")
 	else:
 		anim_player.play("Idle")
+
+func take_damage(amount: int, damage_type = DamageType.NEUTRAL, chip = null):
+	super.take_damage(amount, damage_type, chip)
+
+	if not is_dead:
+		play_hurt()

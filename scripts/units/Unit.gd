@@ -8,7 +8,9 @@ enum Team {
 	PLAYER,
 	ENEMY
 }
+@onready var common_bug: AnimatedSprite2D = $AnimatedSprite2D
 
+var is_hurt := false
 var team: Team
 var is_dead: bool = false
 var action_locked := false
@@ -96,7 +98,26 @@ func take_damage(amount: int, damage_type: DamageType = DamageType.NEUTRAL, chip
 	if hp <= 0:
 		hp = 0
 		die()
+		
+func play_hurt():
+	if is_dead or is_hurt:
+		return
 
+	is_hurt = true
+
+	# Red flash
+	common_bug.modulate = Color(1, 0.3, 0.3)
+
+	common_bug.play("Hurt")
+
+	await get_tree().create_timer(0.15).timeout
+
+	# Return color
+	common_bug.modulate = Color.WHITE
+
+	is_hurt = false
+
+	common_bug.play("Idle")
 # ============================================================
 # HEALING
 # ============================================================
