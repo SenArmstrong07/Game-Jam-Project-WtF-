@@ -1,6 +1,6 @@
 extends CharacterBody2D
 #temp player representation on overworld. Should use player_character instead
-@export var max_speed := 140.0
+@export var max_speed := 200.0
 @export var acceleration := 900.0
 @export var friction := 1000.0
 
