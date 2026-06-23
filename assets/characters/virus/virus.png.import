@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5i6c150ae1rh"
-path="res://.godot/imported/Gemini_Generated_Image_p3dvejp3dvejp3dv.png-8b96786286556d992e7dce8f1b7ff208.ctex"
+path="res://.godot/imported/virus.png-0e9f837bd7118d8eb67a4e9650b838ff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/virus/Gemini_Generated_Image_p3dvejp3dvejp3dv.png"
-dest_files=["res://.godot/imported/Gemini_Generated_Image_p3dvejp3dvejp3dv.png-8b96786286556d992e7dce8f1b7ff208.ctex"]
+source_file="res://assets/characters/virus/virus.png"
+dest_files=["res://.godot/imported/virus.png-0e9f837bd7118d8eb67a4e9650b838ff.ctex"]
 
 [params]
 
