@@ -5,28 +5,13 @@
 [ext_resource type="PackedScene" uid="uid://djdrn1tgj56hi" path="res://scenes/battle/Grid.tscn" id="2_curwf"]
 [ext_resource type="PackedScene" uid="uid://bd000x17iehe0" path="res://scenes/units/player_character.tscn" id="2_g3tu8"]
 [ext_resource type="PackedScene" uid="uid://derk5cxa1jcbg" path="res://scenes/battle/BattlePhaseUI.tscn" id="2_g4sxx"]
-[ext_resource type="Shader" uid="uid://chro3k6bg607f" path="res://scripts/battle/Battlescene.gdshader" id="3_1uck2"]
 [ext_resource type="PackedScene" uid="uid://cqk87mlrchf2c" path="res://scenes/units/Unit.tscn" id="3_g3tu8"]
-[ext_resource type="Texture2D" uid="uid://bysu6mfntht4l" path="res://assets/ui/Battle_BG.png" id="4_1uck2"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_1uck2"]
-shader = ExtResource("3_1uck2")
 
 [node name="Battlescene" type="Node2D" unique_id=1208126284]
 script = ExtResource("1_sx6bk")
 max_selected_chips = 3
 
 [node name="BattlePhaseUI" parent="." unique_id=1182309003 instance=ExtResource("2_g4sxx")]
-
-[node name="TextureRect" type="TextureRect" parent="." unique_id=1800903184]
-texture_filter = 1
-texture_repeat = 2
-material = SubResource("ShaderMaterial_1uck2")
-offset_left = -429.0
-offset_top = -228.0
-offset_right = 935.0
-offset_bottom = 540.0
-texture = ExtResource("4_1uck2")
 
 [node name="Unit" parent="." unique_id=1715206411 instance=ExtResource("3_g3tu8")]
 

@@ -188,6 +188,7 @@ func attack(target: Unit) -> bool:
 # ============================================================
 # DEATH
 # ============================================================
+
 func die() -> void:
 	if is_dead:
 		return
@@ -196,7 +197,115 @@ func die() -> void:
 	hp = 0
 
 	print(name + " died")
-	unit_died.emit(self)
 
 	set_process(false)
 	set_physics_process(false)
+
+	var start_pos = position
+
+	# =====================================================
+	# DETERMINE KNOCKBACK DIRECTION
+	# =====================================================
+	var knockback_dir := 1.0
+
+	var player = get_tree().get_first_node_in_group("player")
+
+	if player:
+		if global_position.x > player.global_position.x:
+			# enemy is right of player -> fly right
+			knockback_dir = 1.0
+		else:
+			# enemy is left of player -> fly left
+			knockback_dir = -1.0
+
+	# =====================================================
+	# BOUNCE SEQUENCE
+	# =====================================================
+	var tween = create_tween()
+
+	# Launch
+	tween.tween_property(
+		self,
+		"position",
+		start_pos + Vector2(32 * knockback_dir, -18),
+		0.12
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# Bounce 1
+	tween.tween_property(
+		self,
+		"position",
+		start_pos + Vector2(52 * knockback_dir, 0),
+		0.18
+	).set_trans(Tween.TRANS_BOUNCE)
+
+	# Bounce 2
+	tween.tween_property(
+		self,
+		"position",
+		start_pos + Vector2(68 * knockback_dir, -10),
+		0.14
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	tween.tween_property(
+		self,
+		"position",
+		start_pos + Vector2(82 * knockback_dir, 0),
+		0.16
+	).set_trans(Tween.TRANS_BOUNCE)
+
+	# Bounce 3
+	tween.tween_property(
+		self,
+		"position",
+		start_pos + Vector2(92 * knockback_dir, -4),
+		0.12
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	tween.tween_property(
+		self,
+		"position",
+		start_pos + Vector2(100 * knockback_dir, 0),
+		0.14
+	).set_trans(Tween.TRANS_BOUNCE)
+
+	await tween.finished
+
+	# =====================================================
+	# DRAMATIC PAUSE
+	# =====================================================
+	await get_tree().create_timer(0.15).timeout
+
+	# =====================================================
+	# BLINK
+	# =====================================================
+	for i in range(4):
+		visible = false
+		await get_tree().create_timer(0.05).timeout
+
+		visible = true
+		await get_tree().create_timer(0.05).timeout
+
+	# =====================================================
+	# SHRINK + FADE
+	# =====================================================
+	tween = create_tween()
+	tween.set_parallel()
+
+	tween.tween_property(
+		self,
+		"scale",
+		Vector2.ZERO,
+		0.20
+	)
+
+	tween.tween_property(
+		self,
+		"modulate:a",
+		0.0,
+		0.20
+	)
+
+	await tween.finished
+
+	unit_died.emit(self)
