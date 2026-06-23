@@ -56,7 +56,6 @@ func grid_to_world(cell: Vector2i) -> Vector2:
 	
 
 func _process(delta):
-
 	if battle_scene.current_phase != Battlescene.BattlePhase.BATTLE:
 		return
 	if movement_locked:

@@ -17,7 +17,6 @@ const QUARANTINE_PROJECTILE = preload("uid://ca4tyfdtbm2xw")
 const PATCH_PROJECTILE = preload("uid://sv6571ybegto")
 const DELETE_PROJECTILE = preload("uid://cxcsd36elkqlv")
 const FIREWALL = preload("uid://x8y5dkw5aur6")
-const SCAN_EFFECT = preload("uid://bty6pm1am7ebp")
 const COMMON_BUG_SCENE = preload("uid://bx0l221gdwc3i")
 
 @onready var grid = $Grid
@@ -62,6 +61,7 @@ func _ready() -> void:
 	_start_preparation_phase()
 
 func _process(delta: float) -> void:
+
 	match current_phase:
 		BattlePhase.PREPARATION:
 			_handle_preparation_input()
@@ -129,6 +129,7 @@ func _start_preparation_phase() -> void:
 	print("=== PREPARATION PHASE ===")
 
 	current_phase = BattlePhase.PREPARATION
+
 	phase_changed.emit(current_phase)
 
 	player_hand = player_deck.draw_hand(5)
@@ -137,13 +138,8 @@ func _start_preparation_phase() -> void:
 	current_chip_index = 0
 	player_chip_index = 0
 
-	var chip_names := []
-
-	for chip in player_hand:
-		chip_names.append(chip.name)
-		
 	_update_ui()
-	print("Player hand: ", chip_names)
+
 
 func _handle_preparation_input() -> void:
 	if player_hand.is_empty():
@@ -173,8 +169,9 @@ func _handle_preparation_input() -> void:
 # ============================================================
 
 func _start_battle_phase() -> void:
-	current_phase = BattlePhase.BATTLE
+	get_tree().paused = false
 
+	current_phase = BattlePhase.BATTLE
 	battle_active = true
 	current_chip_index = 0
 
