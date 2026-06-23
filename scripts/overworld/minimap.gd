@@ -11,13 +11,14 @@ var player: Node2D
 var tracked_enemies: Dictionary = {}  # Dictionary to track which enemies have markers
 var frontlayer: TileMapLayer
 var marker_layer: Control  # Layer above minimap for markers to render on top
+var bounds_drawer: Control  # Control node for drawing world bounds
 
 # Minimap circle clamping
 var minimap_center = Vector2.ZERO  # Updated each frame to camera position
 var minimap_radius = 96  # Radius of circular minimap in pixels
 
 # Terrain rendering
-var terrain_tiles: Dictionary = {}  # Store rendered terrain tiles
+var terrain_tiles: Dictionary = {}  # Store rendered terrain tiles: {tile_pos: ColorRect_node}
 var tile_size = 64  # Match the tilemap tile size
 var tile_colors = {
 	0: Color(0.783, 0.281, 0.469, 1.0),  # Water (blue)
@@ -55,6 +56,22 @@ func _ready() -> void:
 	marker_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(marker_layer)
 	move_child(marker_layer, get_child_count() - 1)  # Move to top layer
+	
+	# Create bounds drawer control for drawing world bounds border
+	bounds_drawer = BoundsDrawer.new()
+	bounds_drawer.minimap_script = self
+	bounds_drawer.name = "BoundsDrawer"
+	bounds_drawer.anchors_preset = Control.PRESET_BOTTOM_RIGHT
+	bounds_drawer.anchor_left = 1.0
+	bounds_drawer.anchor_top = 1.0
+	bounds_drawer.anchor_right = 1.0
+	bounds_drawer.anchor_bottom = 1.0
+	bounds_drawer.offset_left = -192.0
+	bounds_drawer.offset_top = -192.0
+	bounds_drawer.size = Vector2(192, 192)
+	bounds_drawer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bounds_drawer)
+	move_child(bounds_drawer, get_child_count() - 1)  # Move to top layer
 
 func _physics_process(delta: float) -> void:
 	if player:
@@ -65,8 +82,16 @@ func _physics_process(delta: float) -> void:
 		if minimap_cam:
 			minimap_cam.enabled = true
 	
-	# Periodically render nearby terrain chunks
+	# Periodically render nearby terrain chunks while managing memory
 	render_nearby_terrain_chunks()
+	
+	# Redraw the bounds on the bounds drawer
+	if bounds_drawer:
+		bounds_drawer.queue_redraw()
+	
+	# Debug: Print terrain_tiles count every 60 frames
+	if Engine.get_physics_frames() % 60 == 0:
+		print("[MINIMAP] Active terrain tiles: ", terrain_tiles.size())
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -121,9 +146,8 @@ func render_nearby_terrain_chunks() -> void:
 			
 			# Render tile to minimap
 			render_terrain_tile(tile_pos, tile_type)
-			terrain_tiles[tile_pos] = tile_type
 	
-	# Clean up tiles that are too far away
+	# Clean up tiles that are too far away - ACTUALLY DELETE THE NODES
 	var tiles_to_remove = []
 	for tile_pos in terrain_tiles:
 		var dist = camera_tile_pos.distance_to(tile_pos)
@@ -131,6 +155,9 @@ func render_nearby_terrain_chunks() -> void:
 			tiles_to_remove.append(tile_pos)
 	
 	for tile_pos in tiles_to_remove:
+		var rect_node = terrain_tiles[tile_pos]
+		if rect_node and not rect_node.is_queued_for_deletion():
+			rect_node.queue_free()  # Actually delete the ColorRect node
 		terrain_tiles.erase(tile_pos)
 
 
@@ -146,3 +173,26 @@ func render_terrain_tile(tile_pos: Vector2i, tile_type: int) -> void:
 	rect.color = tile_colors.get(tile_type, Color.GRAY)
 	
 	terrain_visuals.add_child(rect)
+	
+	# IMPORTANT: Store reference to the node so we can delete it later
+	terrain_tiles[tile_pos] = rect
+
+
+# Custom Control class for drawing world bounds
+class BoundsDrawer extends Control:
+	var minimap_script: Node
+	
+	func _draw() -> void:
+		if not minimap_script or not minimap_script.player or not minimap_script.frontlayer:
+			return
+		
+		var world_bounds = minimap_script.frontlayer.get_world_bounds()
+		
+		# Scale world bounds to minimap coordinates
+		var minimap_bounds = Rect2(
+			world_bounds.position / minimap_script.zoom_factor,
+			world_bounds.size / minimap_script.zoom_factor
+		)
+		
+		# Draw a border rectangle showing the world bounds
+		draw_rect(minimap_bounds, Color.WHITE, false, 2.0)
