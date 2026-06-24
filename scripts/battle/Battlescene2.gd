@@ -1,26 +1,25 @@
 extends BattleBase
-class_name Battlescene
+class_name Battlescene2
 
 @onready var ui: CanvasLayer = $BattlePhaseUI
 @onready var enemy_hitpoint: Marker2D = $CommonBug/CommonBugMarker
 @onready var player_muzzle: Marker2D =  $PlayerCharacter/PlayerMarker
 
-
 const QUARANTINE_PROJECTILE = preload("uid://ca4tyfdtbm2xw")
 const PATCH_PROJECTILE = preload("uid://sv6571ybegto")
 const DELETE_PROJECTILE = preload("uid://cxcsd36elkqlv")
 const FIREWALL = preload("uid://x8y5dkw5aur6")
-const COMMON_BUG_SCENE = preload("uid://bx0l221gdwc3i")
+const THROW_BUG_SCENE = preload("uid://p2in84e67sur")
+
 
 @onready var grid = $Grid
 @onready var player: Unit = $PlayerCharacter
 var enemies: Array[Unit] = []
 @export var max_selected_chips := 3
-var battle_scene: BattleBase
 # PLAYER ONLY uses chips now
 var player_deck: ChipDeck
 var player_hand: Array[Chip] = []
-
+var battle_scene: BattleBase
 var selected_chips: Array[Chip] = []
 var current_chip_index := 0
 var player_chip_index: int = 0
@@ -110,7 +109,7 @@ func spawn_enemy(pos: Vector2i) -> void:
 	while is_enemy_on_tile(pos):
 		pos.x += 1
 
-	var e: Unit = COMMON_BUG_SCENE.instantiate()
+	var e: Unit = THROW_BUG_SCENE.instantiate()
 	add_child(e)
 
 	e.add_to_group("enemies")

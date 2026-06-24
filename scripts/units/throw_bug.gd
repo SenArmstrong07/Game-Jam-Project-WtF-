@@ -1,11 +1,11 @@
 extends Unit
 
-@onready var anim_player: AnimatedSprite2D = $AnimatedSprite2D
-const EnemyBasicProjectile = preload("res://scenes/Attacks/enemy_basic_projectile.tscn")
+@onready var anim_player: AnimatedSprite2D = $throwbugsprite
+const EnemyThrowProjectile = preload("res://scenes/Attacks/Throw_Projectile.tscn")
 
 @onready var player_character: Unit = $"../PlayerCharacter"
 @onready var battle_scene: BattleBase = get_parent()
-@onready var ProjectileShootPoint: Marker2D = $CommonBugMarker
+@onready var ProjectileThrowPoint: Marker2D = $throwbugMarkr
 
 const GRID_WIDTH := 4
 const GRID_HEIGHT := 4
@@ -233,9 +233,9 @@ func shoot():
 	movement_locked = false
 	
 func shoot_single():
-	var projectile = EnemyBasicProjectile.instantiate()
+	var projectile = EnemyThrowProjectile.instantiate()
 
-	var spawn_pos = ProjectileShootPoint.global_position
+	var spawn_pos = ProjectileThrowPoint.global_position
 	projectile.global_position = spawn_pos
 
 	projectile.direction = Vector2.LEFT
@@ -246,9 +246,9 @@ func shoot_single():
 func shoot_double():
 	print("SPECIAL ATTACK!")
 
-	var spawn_pos = ProjectileShootPoint.global_position
+	var spawn_pos = ProjectileThrowPoint.global_position
 
-	var projectile = EnemyBasicProjectile.instantiate()
+	var projectile = EnemyThrowProjectile.instantiate()
 	projectile.global_position = spawn_pos
 	projectile.direction = Vector2.LEFT
 	projectile.damage = attack_power + 5
@@ -259,7 +259,7 @@ func shoot_double():
 	if is_dead:
 		return
 
-	projectile = EnemyBasicProjectile.instantiate()
+	projectile = EnemyThrowProjectile.instantiate()
 	projectile.global_position = spawn_pos
 	projectile.direction = Vector2.LEFT
 	projectile.damage = attack_power + 5
@@ -296,13 +296,13 @@ func play_move_animation(old_pos: Vector2i, new_pos: Vector2i):
 		return
 		
 	if delta.x > 0:
-		anim_player.play("Right")
+		anim_player.play("Move_forward")
 	elif delta.x < 0:
-		anim_player.play("Left")
+		anim_player.play("Move_backward")
 	elif delta.y > 0:
-		anim_player.play("Down")
+		anim_player.play("Move_down")
 	elif delta.y < 0:
-		anim_player.play("Up")
+		anim_player.play("Move_up")
 	else:
 		anim_player.play("Idle")
 
