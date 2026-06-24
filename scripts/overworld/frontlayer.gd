@@ -213,7 +213,9 @@ func generate_chunk(chunk_coord: Vector2i):
 			var cell_to_place: Vector2i
 			var is_valid_spawn_tile = false
 			if alt < 0:
-				cell_to_place = Vector2i(0, 0)  # impassable tile ("sea")
+				#cell_to_place = Vector2i(0, 0)  # impassable tile ("sea")
+				#We skip painting water tiles to replace that with a moving background (TextureRect)
+				continue
 			else:
 				# Land - use the altitude-based selection
 				cell_to_place = tile_coords
@@ -239,8 +241,8 @@ func get_altitude(x: int, y: int) -> float:
 
 
 func spawn_fixed_enemy_count() -> void:
-	"""Spawn a fixed number of enemies (random between 1-15) after world generation."""
-	var enemy_count = randi_range(1, 15)
+	"""Spawn a fixed number of enemies (random between 3-10) after world generation."""
+	var enemy_count = randi_range(3, 10)
 	var spawned = 0
 	var max_attempts = enemy_count * 5  # Try up to 5x attempts to place all enemies
 	var attempt = 0
@@ -292,7 +294,7 @@ func spawn_fixed_enemy_count() -> void:
 
 func get_world_bounds() -> Rect2:
 	"""Returns the playable world bounds as a Rect2"""
-	return Rect2(world_min_x, world_min_y, world_max_x - world_min_x, world_max_y - world_min_y)
+	return Rect2(Vector2(world_min_x, world_min_y), Vector2(world_max_x - world_min_x, world_max_y - world_min_y))
 
 
 func get_world_size() -> Vector2:

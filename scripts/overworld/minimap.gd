@@ -4,6 +4,7 @@ extends CanvasLayer
 @onready var map_markers: Node2D = %mapMarkers
 @onready var terrain_visuals: Node2D = %TerrainVisuals
 @onready var marker_scene = preload("res://scenes/overworld/Marker.tscn")
+@onready var world_map_scene = preload("res://scenes/overworld/world_map_ui.tscn")
 
 var zoom_factor = 8
 var markers = []
@@ -12,6 +13,8 @@ var tracked_enemies: Dictionary = {}  # Dictionary to track which enemies have m
 var frontlayer: TileMapLayer
 var marker_layer: Control  # Layer above minimap for markers to render on top
 var bounds_drawer: Control  # Control node for drawing world bounds
+var subviewport_container: SubViewportContainer  # Reference to minimap container
+var world_map_ui = null
 
 # Minimap circle clamping
 var minimap_center = Vector2.ZERO  # Updated each frame to camera position
@@ -56,6 +59,16 @@ func _ready() -> void:
 	marker_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(marker_layer)
 	move_child(marker_layer, get_child_count() - 1)  # Move to top layer
+	
+	# Get reference to SubViewportContainer for click detection
+	subviewport_container = find_child("SubViewportContainer")
+	if subviewport_container:
+		# Connect the gui_input signal to detect minimap clicks
+		if not subviewport_container.gui_input.is_connected(_on_minimap_gui_input):
+			subviewport_container.gui_input.connect(_on_minimap_gui_input)
+		print("[MINIMAP] Click handler connected - click minimap to open world map")
+	else:
+		print("[MINIMAP] WARNING: SubViewportContainer not found!")
 	
 	# Create bounds drawer control for drawing world bounds border
 	bounds_drawer = BoundsDrawer.new()
@@ -196,3 +209,34 @@ class BoundsDrawer extends Control:
 		
 		# Draw a border rectangle showing the world bounds
 		draw_rect(minimap_bounds, Color.WHITE, false, 2.0)
+
+
+func _on_minimap_gui_input(event: InputEvent) -> void:
+	"""Handle clicks on the minimap to open the full world map."""
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		# Open the world map UI
+		_open_world_map()
+
+
+func _open_world_map() -> void:
+	"""Show world map UI."""
+
+	if not world_map_scene:
+		print("[MINIMAP] Error: world_map_scene not loaded")
+		return
+
+	# Create only once
+	if world_map_ui == null:
+		print("[MINIMAP] Creating world map for first time...")
+		world_map_ui = world_map_scene.instantiate()
+
+		if not world_map_ui:
+			print("[MINIMAP] Error: Failed to instantiate world_map_scene")
+			return
+
+		get_tree().root.add_child(world_map_ui)
+
+	# Show existing map
+	world_map_ui.visible = true
+
+	print("[MINIMAP] World map opened")

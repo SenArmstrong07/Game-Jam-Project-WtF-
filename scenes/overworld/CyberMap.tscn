@@ -1,10 +1,15 @@
 [gd_scene format=3 uid="uid://ckalk6sjv740q"]
 
 [ext_resource type="Texture2D" uid="uid://d1qlrxiv6jy6p" path="res://assets/tiles/city.png" id="1_ruwbt"]
+[ext_resource type="Texture2D" uid="uid://depai5425qbu6" path="res://assets/tiles/net_world.png" id="2_ojrtv"]
 [ext_resource type="Script" uid="uid://t6qfwqjp5o4y" path="res://scripts/overworld/frontlayer.gd" id="2_udnr2"]
 [ext_resource type="PackedScene" uid="uid://ctc3bb7s55ha1" path="res://scenes/units/overworld_player.tscn" id="3_80qnd"]
 [ext_resource type="PackedScene" uid="uid://b8uwoo3tcjryd" path="res://scenes/overworld/minimap.tscn" id="4_01jcn"]
 [ext_resource type="PackedScene" uid="uid://bp7rq1s1rj2x8" path="res://scenes/overworld/loading_screen.tscn" id="5_loading"]
+[ext_resource type="Shader" uid="uid://chro3k6bg607f" path="res://scripts/battle/Battlescene.gdshader" id="6_ojrtv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pmfpv"]
+shader = ExtResource("6_ojrtv")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_udnr2"]
 texture = ExtResource("1_ruwbt")
@@ -56,6 +61,23 @@ sources/0 = SubResource("TileSetAtlasSource_udnr2")
 
 [node name="CyberMap" type="Node2D" unique_id=833708849]
 
+[node name="Camera2D" type="Camera2D" parent="." unique_id=350550884]
+
+[node name="BackgroundTexture" type="TextureRect" parent="Camera2D" unique_id=627048204]
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_pmfpv")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+texture = ExtResource("2_ojrtv")
+
 [node name="TileNode" type="Node2D" parent="." unique_id=2118573039]
 
 [node name="front" type="TileMapLayer" parent="TileNode" unique_id=508529142]
@@ -63,8 +85,6 @@ tile_set = SubResource("TileSet_80qnd")
 script = ExtResource("2_udnr2")
 
 [node name="OverworldPlayer" parent="." unique_id=1664911443 instance=ExtResource("3_80qnd")]
-
-[node name="Camera2D" type="Camera2D" parent="." unique_id=350550884]
 
 [node name="Minimap" parent="." unique_id=1115139525 instance=ExtResource("4_01jcn")]
 
