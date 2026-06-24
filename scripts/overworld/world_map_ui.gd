@@ -13,6 +13,9 @@ var hovered_island: Array[Vector2i] = []  # Current hovered island tiles
 var hovered_tile: Vector2i = Vector2i.ZERO  # Current hovered tile
 var last_hovered_island_size: int = 0  # Track if island changed to minimize redraws
 var is_island_grouping_complete: bool = false  # Flag to prevent interaction during grouping
+var scanner_offset: float = 0.0
+const SCANNER_SPEED: float = 250.0
+const SCANNER_BEAM_HEIGHT: float = 80.0
 
 func _ready() -> void:
 	# Get references
@@ -63,6 +66,10 @@ func _ready() -> void:
 	# Pre-scan all land tiles and group into islands
 	_scan_all_land_tiles()
 	print("[WORLD_MAP] Scanned ", land_tiles.size(), " land tiles, grouping into islands...")
+	
+	# Start the scanner animation while islands load
+	scanner_offset = -SCANNER_BEAM_HEIGHT
+	set_process(true)
 	
 	# Group islands over multiple frames to prevent freeze
 	await _group_tiles_into_islands_async()
@@ -145,6 +152,8 @@ func _group_tiles_into_islands_async() -> void:
 	
 	print("[WORLD_MAP] ASYNC island grouping complete - found ", islands.size(), " islands")
 	is_island_grouping_complete = true
+	set_process(false)
+	queue_redraw()
 	print("[WORLD_MAP] Island interaction now enabled")
 
 func _flood_fill_island(start_tile: Vector2i, processed: Dictionary) -> Array[Vector2i]:
@@ -195,48 +204,90 @@ func _draw() -> void:
 	draw_rect(map_rect, Color(0.1, 0.1, 0.15), true)
 	draw_rect(map_rect, Color(0.5, 0.5, 0.5), false, 2)
 	
-	# Draw all land tiles
+	# Draw all land tiles only after grouping completes
 	var tile_screen_size = tile_size * zoom_factor
-	for tile_pos in land_tiles:
-		var screen_pos = tile_to_screen[tile_pos]
-		var rect = Rect2(screen_pos, Vector2(tile_screen_size, tile_screen_size))
-		
-		# Color based on altitude (optional visual variety)
-		var altitude = frontlayer.get_altitude(tile_pos.x, tile_pos.y)
-		var color_variant = clamp((altitude + 10) / 20.0, 0.0, 1.0)
-		var tile_color = Color(0.2 + color_variant * 0.4, 0.6 + color_variant * 0.2, 0.3, 0.8)
-		
-		draw_rect(rect, tile_color, true)
-	
-	# Draw glow effect on hovered island
-	if hovered_island.size() > 0:
-		for tile_pos in hovered_island:
-			# Make sure we have screen coordinates for this tile
-			if tile_pos not in tile_to_screen:
-				var world_pos = frontlayer.map_to_local(tile_pos)
-				var screen_pos = _world_to_screen(world_pos)
-				tile_to_screen[tile_pos] = screen_pos
-			
+	if is_island_grouping_complete:
+		for tile_pos in land_tiles:
 			var screen_pos = tile_to_screen[tile_pos]
 			var rect = Rect2(screen_pos, Vector2(tile_screen_size, tile_screen_size))
 			
-			# Draw bright yellow glow border
-			draw_rect(rect, Color.YELLOW, false, 3)
+			# Color based on altitude (optional visual variety)
+			var altitude = frontlayer.get_altitude(tile_pos.x, tile_pos.y)
+			var color_variant = clamp((altitude + 10) / 20.0, 0.0, 1.0)
+			var tile_color = Color(0.2 + color_variant * 0.4, 0.6 + color_variant * 0.2, 0.3, 0.8)
 			
-			# Draw a semi-transparent highlight on top
-			draw_rect(rect, Color(1, 1, 0, 0.3), true)
+			draw_rect(rect, tile_color, true)
 	
-	# Draw player current position marker
-	var player_world_pos = frontlayer.map_to_local(frontlayer.local_to_map(player.position))
-	var player_screen_pos = _world_to_screen(player_world_pos)
-	draw_circle(player_screen_pos, 8, Color.YELLOW)
-	draw_circle(player_screen_pos, 8, Color.WHITE, false, 2)
+		# Draw glow effect on hovered island
+		if hovered_island.size() > 0:
+			for tile_pos in hovered_island:
+				# Make sure we have screen coordinates for this tile
+				if tile_pos not in tile_to_screen:
+					var world_pos = frontlayer.map_to_local(tile_pos)
+					var screen_pos = _world_to_screen(world_pos)
+					tile_to_screen[tile_pos] = screen_pos
+				
+				var screen_pos = tile_to_screen[tile_pos]
+				var rect = Rect2(screen_pos, Vector2(tile_screen_size, tile_screen_size))
+				
+				# Draw bright yellow glow border
+				draw_rect(rect, Color.YELLOW, false, 3)
+				
+				# Draw a semi-transparent highlight on top
+				draw_rect(rect, Color(1, 1, 0, 0.3), true)
 	
+		# Draw player current position marker
+		var player_world_pos = frontlayer.map_to_local(frontlayer.local_to_map(player.position))
+		var player_screen_pos = _world_to_screen(player_world_pos)
+		draw_circle(player_screen_pos, 8, Color.YELLOW)
+		draw_circle(player_screen_pos, 8, Color.WHITE, false, 2)
+	else:
+		_draw_loading_scanner(map_rect)
+
 	# Show loading message if still grouping islands
 	if not is_island_grouping_complete:
 		draw_set_transform(Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y / 2), 0, Vector2.ONE)
 		draw_string(ThemeDB.fallback_font, Vector2(-100, -20), "Loading world map...", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
 		draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+
+func _draw_loading_scanner(map_rect: Rect2) -> void:
+	var beam_rect = Rect2(
+		map_rect.position.x,
+		map_rect.position.y + scanner_offset,
+		map_rect.size.x,
+		SCANNER_BEAM_HEIGHT
+	)
+	var visible_top = max(beam_rect.position.y, map_rect.position.y)
+	var visible_bottom = min(beam_rect.position.y + beam_rect.size.y, map_rect.position.y + map_rect.size.y)
+	
+	if visible_bottom <= visible_top:
+		# Nothing visible yet, just redraw the dimmed map area
+		draw_rect(map_rect, Color(0, 0, 0, 0.5), true)
+		return
+	
+	var visible_beam_rect = Rect2(
+		beam_rect.position.x,
+		visible_top,
+		beam_rect.size.x,
+		visible_bottom - visible_top
+	)
+	
+	# Dim the map area behind the scanner
+	draw_rect(map_rect, Color(0, 0, 0, 0.5), true)
+	# Draw a soft scanner beam inside the map bounds
+	draw_rect(visible_beam_rect, Color(0.3, 0.8, 1.0, 0.18), true)
+	draw_rect(visible_beam_rect, Color(0.6, 1.0, 1.0, 0.35), false, 2)
+	# Glow lines at the top and bottom of the visible beam
+	draw_line(visible_beam_rect.position, visible_beam_rect.position + Vector2(visible_beam_rect.size.x, 0), Color(0.6, 1.0, 1.0, 0.6), 2)
+	draw_line(visible_beam_rect.position + Vector2(0, visible_beam_rect.size.y), visible_beam_rect.position + Vector2(visible_beam_rect.size.x, visible_beam_rect.size.y), Color(0.6, 1.0, 1.0, 0.6), 2)
+
+func _process(delta: float) -> void:
+	if not is_island_grouping_complete:
+		scanner_offset += SCANNER_SPEED * delta
+		var map_rect = Rect2(Vector2(360, 20), world_size * zoom_factor)
+		if scanner_offset > map_rect.size.y + SCANNER_BEAM_HEIGHT:
+			scanner_offset = -SCANNER_BEAM_HEIGHT
+		queue_redraw()
 
 func _input(event: InputEvent) -> void:
 	"""Handle input for teleportation."""
