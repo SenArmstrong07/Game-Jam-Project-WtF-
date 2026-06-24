@@ -8,7 +8,7 @@ enum Team {
 	PLAYER,
 	ENEMY
 }
-@onready var common_bug: AnimatedSprite2D = $AnimatedSprite2D
+var sprite: AnimatedSprite2D
 
 var is_hurt := false
 var team: Team
@@ -39,6 +39,12 @@ var attack_damage_type: DamageType = DamageType.NEUTRAL
 
 var dmg_eff: Array[DamageType] = []
 
+func _ready():
+	sprite = find_child("AnimatedSprite2D", true, false)
+
+	if sprite == null:
+		push_error(name + " is missing an AnimatedSprite2D")
+		
 # ============================================================
 # DAMAGE TYPES
 # ============================================================
@@ -103,21 +109,24 @@ func play_hurt():
 	if is_dead or is_hurt:
 		return
 
+	if sprite == null:
+		return
+
 	is_hurt = true
 
-	# Red flash
-	common_bug.modulate = Color(1, 0.3, 0.3)
+	sprite.modulate = Color(1, 0.3, 0.3)
 
-	common_bug.play("Hurt")
+	if sprite.sprite_frames.has_animation("Hurt"):
+		sprite.play("Hurt")
 
 	await get_tree().create_timer(0.15).timeout
 
-	# Return color
-	common_bug.modulate = Color.WHITE
+	sprite.modulate = Color.WHITE
+
+	if sprite.sprite_frames.has_animation("Idle"):
+		sprite.play("Idle")
 
 	is_hurt = false
-
-	common_bug.play("Idle")
 # ============================================================
 # HEALING
 # ============================================================

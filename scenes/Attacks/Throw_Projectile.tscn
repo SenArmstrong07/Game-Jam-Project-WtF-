@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dieb2klqxxsjl"]
 
 [ext_resource type="Texture2D" uid="uid://ckjolnaeaufq" path="res://assets/characters/MeGaMan/Reactor_Man_Enemies/PNG/Roller_Bot.png" id="1_21y87"]
+[ext_resource type="Script" uid="uid://t2gwoe4yo25p" path="res://scripts/manager/throw_projectile.gd" id="1_dnn5k"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_68h4g"]
 atlas = ExtResource("1_21y87")
@@ -67,16 +68,20 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_7nrbm"]
-radius = 40.0
+radius = 14.422205
 
 [node name="Area2D" type="Area2D" unique_id=450984865]
+collision_layer = 2
+collision_mask = 2
+script = ExtResource("1_dnn5k")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1145272975]
-position = Vector2(-10.187504, -34.84375)
-scale = Vector2(3.5755205, 3.8578124)
+position = Vector2(-3.0000014, -28.000004)
+scale = Vector2(1.39, 1.5)
 sprite_frames = SubResource("SpriteFrames_cq3a5")
 autoplay = "default"
-frame_progress = 0.20424093
+frame_progress = 0.17781858
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=602007132]
+position = Vector2(0, -13)
 shape = SubResource("CircleShape2D_7nrbm")

@@ -1,0 +1,45 @@
+[gd_scene format=4 uid="uid://brokp26mgwjxv"]
+
+[ext_resource type="Script" uid="uid://cl8qasrw0c2cv" path="res://scripts/battle/Battlescene2.gd" id="1_dina3"]
+[ext_resource type="PackedScene" uid="uid://derk5cxa1jcbg" path="res://scenes/battle/BattlePhaseUI.tscn" id="2_fwc5f"]
+[ext_resource type="Shader" uid="uid://2qn17qqu0agv" path="res://scripts/battle/Battlescene2.gdshader" id="4_fwc5f"]
+[ext_resource type="Texture2D" uid="uid://bysu6mfntht4l" path="res://assets/ui/Battle_BG.png" id="4_vexws"]
+[ext_resource type="PackedScene" uid="uid://cqk87mlrchf2c" path="res://scenes/units/Unit.tscn" id="5_sew1q"]
+[ext_resource type="PackedScene" uid="uid://6hbsmgfnmld0" path="res://scenes/battle/GridMap.tscn" id="6_brl7x"]
+[ext_resource type="PackedScene" uid="uid://bd000x17iehe0" path="res://scenes/units/player_character.tscn" id="7_8waxy"]
+[ext_resource type="PackedScene" uid="uid://djdrn1tgj56hi" path="res://scenes/battle/Grid.tscn" id="8_7fm7x"]
+[ext_resource type="PackedScene" uid="uid://eexfwe7w37sf" path="res://scenes/battle/battle_bgm.tscn" id="9_wulw0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8jovo"]
+shader = ExtResource("4_fwc5f")
+shader_parameter/overlay_color = Color(2, 1, 1, 1)
+shader_parameter/overlay_strength = 0.5
+
+[node name="Battlescene2" type="Node2D" unique_id=1208126284]
+script = ExtResource("1_dina3")
+
+[node name="BattlePhaseUI" parent="." unique_id=1182309003 instance=ExtResource("2_fwc5f")]
+
+[node name="Unit" parent="." unique_id=1715206411 instance=ExtResource("5_sew1q")]
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1470599231]
+texture_repeat = 2
+material = SubResource("ShaderMaterial_8jovo")
+offset_left = -391.0
+offset_top = -220.0
+offset_right = 973.0
+offset_bottom = 548.0
+texture = ExtResource("4_vexws")
+
+[node name="GridMap" parent="." unique_id=1241810169 instance=ExtResource("6_brl7x")]
+position = Vector2(1, 2)
+tile_map_data = PackedByteArray("AAAWAAEAAAAAAA8AAAAWAAQAAAAAAA8AAAAWAAcAAAAAAA8AAAAWAAoAAAAAAA8AAAAAAAAAAAAHAAMAAAABAAAAAAAHAAMAAAACAAAAAAAHAAMAAAADAAAAAAAHAAMAAAADAAEAAAAHAAMAAAACAAEAAAAHAAMAAAABAAEAAAAHAAMAAAAAAAEAAAAHAAMAAAAAAAIAAAAHAAMAAAABAAIAAAAHAAMAAAACAAIAAAAHAAMAAAADAAIAAAAHAAMAAAACAAMAAAAHAAMAAAABAAMAAAAHAAMAAAAAAAMAAAAHAAMAAAADAAMAAAAHAAMAAAAEAAAAAAAEAAMAAAAFAAAAAAAEAAMAAAAGAAAAAAAEAAMAAAAHAAAAAAAEAAMAAAAHAAEAAAAEAAMAAAAGAAEAAAAEAAMAAAAFAAEAAAAEAAMAAAAEAAEAAAAEAAMAAAAEAAIAAAAEAAMAAAAFAAIAAAAEAAMAAAAGAAIAAAAEAAMAAAAHAAIAAAAEAAMAAAAHAAMAAAAEAAMAAAAGAAMAAAAEAAMAAAAFAAMAAAAEAAMAAAAEAAMAAAAEAAMAAAA=")
+
+[node name="PlayerCharacter" parent="." unique_id=1154184100 instance=ExtResource("7_8waxy")]
+position = Vector2(1, -64)
+
+[node name="Grid" parent="." unique_id=651052919 instance=ExtResource("8_7fm7x")]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1004523237]
+
+[node name="BattleBGM" parent="." unique_id=438235275 instance=ExtResource("9_wulw0")]

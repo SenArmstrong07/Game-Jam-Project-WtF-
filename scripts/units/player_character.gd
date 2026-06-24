@@ -3,7 +3,7 @@ extends Unit
 @onready var camera_2d: Camera2D = $"../Camera2D"
 @onready var anim_player: AnimatedSprite2D = $AnimatedSprite2D
 const DELETE_PROJECTILE = preload("uid://cxcsd36elkqlv")
-@onready var battle_scene: Battlescene = $".."
+@onready var battle_scene = get_parent()
 @export var hurt_duration := 0.2
 
 const GRID_WIDTH := 8
@@ -90,7 +90,7 @@ func grid_to_world(cell: Vector2i) -> Vector2:
 
 #player controls
 func _unhandled_input(event):
-	if battle_scene.current_phase != Battlescene.BattlePhase.BATTLE:
+	if battle_scene.current_phase != battle_scene.BattlePhase.BATTLE:
 		return
 	if movement_locked:
 		return
