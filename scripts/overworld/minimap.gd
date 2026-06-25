@@ -215,18 +215,22 @@ func _on_minimap_gui_input(event: InputEvent) -> void:
 	"""Handle clicks on the minimap to open the full world map."""
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		# Open the world map UI
+		print("[MINIMAP] CLICK DETECTED")
 		_open_world_map()
 
 
 func _open_world_map() -> void:
 	"""Show world map UI."""
+	print("[MINIMAP] OPEN WORLD MAP CALLED")
+	print("world_map_ui = ", world_map_ui)
+	print("valid = ", is_instance_valid(world_map_ui))
 
 	if not world_map_scene:
 		print("[MINIMAP] Error: world_map_scene not loaded")
 		return
 
-	# Create only once
-	if world_map_ui == null:
+	# Create only once, or recreate if the reference was freed
+	if world_map_ui == null or not is_instance_valid(world_map_ui):
 		print("[MINIMAP] Creating world map for first time...")
 		world_map_ui = world_map_scene.instantiate()
 
@@ -237,6 +241,18 @@ func _open_world_map() -> void:
 		get_tree().root.add_child(world_map_ui)
 
 	# Show existing map
+	# Re-add to tree if it was removed
+	if world_map_ui.get_parent() == null:
+		get_tree().root.add_child(world_map_ui)
+
+	# Show existing map
 	world_map_ui.visible = true
 
 	print("[MINIMAP] World map opened")
+
+	var map_container = world_map_ui.get_node_or_null("MapContainer")
+	if map_container:
+		map_container.mouse_filter = Control.MOUSE_FILTER_STOP
+		map_container.set_process_input(true)
+	world_map_ui.set_process(true)
+

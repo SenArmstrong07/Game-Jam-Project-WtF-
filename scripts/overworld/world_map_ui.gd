@@ -19,6 +19,8 @@ const SCANNER_BEAM_HEIGHT: float = 80.0
 
 func _ready() -> void:
 	# Get references
+	print("[WORLD MAP SCRIPT ATTACHED TO:]", self)
+	print("CLASS:", get_class())
 	var root = get_tree().root.get_child(0)
 	if not root:
 		print("[WORLD_MAP] Error: Could not find root scene")
@@ -36,6 +38,9 @@ func _ready() -> void:
 			print("  - player is NULL")
 		queue_free()
 		return
+
+	# Ensure input is active only while the map is visible.
+	set_process_input(true)
 	
 	# Get world bounds
 	world_bounds_rect = frontlayer.get_world_bounds()
@@ -291,6 +296,16 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	"""Handle input for teleportation."""
+	# Ignore input when the map UI is hidden or not in the scene tree.
+	if not is_visible_in_tree():
+		return
+
+	print(
+		"[WORLD_MAP] INPUT:",
+		" visible=", visible,
+		" in_tree=", is_visible_in_tree()
+	)
+
 	if event is InputEventMouseMotion:
 		_handle_mouse_motion(event.position)
 	elif event is InputEventMouseButton:
@@ -367,6 +382,7 @@ func _find_island_for_tile(tile_pos: Vector2i) -> void:
 func _handle_left_click(screen_pos: Vector2) -> void:
 	"""Handle left click on the map - teleport player to clicked tile."""
 	# Don't allow clicks until island grouping is complete
+	print("[WORLD_MAP] Handle_left_click")
 	if not is_island_grouping_complete:
 		print("[WORLD_MAP] Island grouping still in progress, please wait...")
 		return
@@ -385,6 +401,8 @@ func _handle_left_click(screen_pos: Vector2) -> void:
 		print("[WORLD_MAP] No land tile found near click")
 		return
 	
+	print("[WORLD_MAP] ABOUT TO TELEPORT")
+
 	# Teleport player to that tile
 	var tile_world_pos = frontlayer.map_to_local(nearest_tile)
 	player.position = tile_world_pos
@@ -421,16 +439,29 @@ func _find_nearest_land_tile(world_pos: Vector2) -> Vector2i:
 
 func _close_map() -> void:
 	"""Close the world map UI and ensure proper cleanup."""
-	# Clear references
+	# Clear references and stop input while hidden
+	print(
+	"[WORLD_MAP] state:",
+	" visible=", visible,
+	" processing=", is_processing(),
+	" input=", is_processing_input()
+)
 	hovered_island.clear()
 	hovered_tile = Vector2i.ZERO
+
+	set_process(false)
+	set_process_input(false)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
-	# Get parent CanvasLayer and hide it (not just self)
-	var canvas_layer = get_parent()
-	print("Map parent is: ", get_parent())
-	if canvas_layer is CanvasLayer:
-		canvas_layer.visible = false
+	if get_parent():
+		get_parent().visible = false
 	else:
-		queue_free()
-	
+		print("[WORLD_MAP] Warning: No parent to remove from")
+
+	print("SELF: ", self)
+
+	if get_parent():
+		print("PARENT:", get_parent().name)
+		print("PARENT TYPE:", get_parent().get_class())
+
 	print("[WORLD_MAP] Map closed")
