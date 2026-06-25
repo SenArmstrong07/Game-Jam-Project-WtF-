@@ -1,12 +1,13 @@
 extends CanvasLayer
 
-@onready var hand_container: HBoxContainer = $PanelContainer/VBoxContainer/PlayerHand
+@onready var hand_container: HBoxContainer = %PlayerHand
 @onready var selected_container: HBoxContainer = $PanelContainer/VBoxContainer/SelectedContainer
 
-@onready var chip_name_label: Label = $PanelContainer/VBoxContainer/ChipNameLabel
-@onready var chip_description_label: Label = $PanelContainer/VBoxContainer/ChipDescriptionLabel
-@onready var chip_power_label: Label = $PanelContainer/VBoxContainer/ChipPowerLabel
-@onready var selection_count_label: Label = $PanelContainer/VBoxContainer/SelectionCountLabel
+@onready var chip_name_label: Label = %ChipNameLabel
+@onready var chip_description_label: Label = %ChipDescriptionLabel
+@onready var chip_power_label: Label = %ChipPowerLabel
+@onready var selection_count_label: Label = %SelectionCountLabel
+
 @onready var player_hp_label: Label = $PanelContainer2/VBoxContainer/PlayerHPLabel
 @onready var enemy_hp_label: Label = $PanelContainer2/VBoxContainer/EnemyHPLabel
 
@@ -56,7 +57,7 @@ func _build_hand(hand: Array[Chip], cursor_index: int):
 		label.text = hand[i].name
 
 		if i == cursor_index:
-			label.text = "> " + label.text
+			label.text = "[" + label.text + "]"
 
 		hand_container.add_child(label)
 		

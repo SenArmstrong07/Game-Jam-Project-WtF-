@@ -70,8 +70,6 @@ func bounce():
 
 	on_land(global_position)
 
-	landing_squash()
-
 	bounce()
 
 
@@ -97,16 +95,42 @@ func throw_special(target_tile: Vector2i):
 
 	on_special_land(target_pos)
 
-
 func on_special_land(tile_pos: Vector2):
 
-	hit_player_at_position(tile_pos, 64.0)
+	spawn_plus_tile_effect(tile_pos)
 
-	spawn_tile_effect(tile_pos)
+	hit_player_at_position(tile_pos, 40.0)
 
 	await disappear()
+	
+func spawn_plus_tile_effect(center_pos: Vector2):
 
+	var offsets = [
+		Vector2.ZERO,
+		Vector2(TILE_SIZE, 0),
+		Vector2(-TILE_SIZE, 0),
+		Vector2(0, TILE_SIZE),
+		Vector2(0, -TILE_SIZE)
+	]
 
+	for offset in offsets:
+
+		var fx := ColorRect.new()
+
+		fx.size = Vector2(TILE_SIZE, TILE_SIZE)
+		fx.position = center_pos + offset - Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
+
+		fx.color = Color(1.0, 0.2, 0.2, 0.6)
+
+		get_tree().current_scene.add_child(fx)
+
+		var tween = fx.create_tween()
+		tween.tween_property(fx, "modulate:a", 0.0, 0.25)
+
+		tween.finished.connect(func():
+			if is_instance_valid(fx):
+				fx.queue_free()
+		)
 # ============================================================
 # CORE HIT LOGIC (FIXED SYSTEM)
 # ============================================================
@@ -165,17 +189,15 @@ func show_tile_warning(tile_pos: Vector2):
 
 	get_tree().current_scene.add_child(marker)
 
-	var tween = create_tween()
+	var tween = marker.create_tween()
 	tween.set_loops(3)
-
 	tween.tween_property(marker, "modulate:a", 0.9, 0.06)
 	tween.tween_property(marker, "modulate:a", 0.15, 0.06)
 
-	await tween.finished
+	await get_tree().create_timer(0.4).timeout
 
 	if is_instance_valid(marker):
 		marker.queue_free()
-
 
 # ============================================================
 # MOVEMENT
@@ -199,19 +221,6 @@ func bounce_to_tile(target_pos: Vector2, arc_height: float, duration: float) -> 
 		global_position.y -= arc
 
 	global_position = target_pos
-
-
-# ============================================================
-# FEEL
-# ============================================================
-
-func landing_squash():
-
-	scale = Vector2(1.25, 0.75)
-
-	var tween = create_tween()
-	tween.tween_property(self, "scale", Vector2.ONE, 0.10)
-
 
 # ============================================================
 # CLEANUP
