@@ -298,6 +298,26 @@ func play_move_animation(old_pos: Vector2i, new_pos: Vector2i):
 	else:
 		anim_player.play("Idle")
 
+func play_hurt():
+	if is_dead or is_hurt:
+		return
+
+	is_hurt = true
+
+	anim_player.modulate = Color(1, 0.3, 0.3)
+
+	if anim_player.sprite_frames.has_animation("Hurt"):
+		anim_player.play("Hurt")
+
+	await get_tree().create_timer(0.15).timeout
+
+	anim_player.modulate = Color.WHITE
+
+	if anim_player.sprite_frames.has_animation("Idle"):
+		anim_player.play("Idle")
+
+	is_hurt = false
+
 func take_damage(amount: int, damage_type = DamageType.NEUTRAL, chip = null):
 	super.take_damage(amount, damage_type, chip)
 

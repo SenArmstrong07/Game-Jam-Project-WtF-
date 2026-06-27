@@ -87,12 +87,12 @@ func take_damage(amount: int, damage_type: DamageType = DamageType.NEUTRAL, chip
 
 	var multiplier: float = 1.0
 
-	if chip != null:
-		multiplier = chip.get_damage_multiplier(self)
-	elif damage_type == DamageType.SUPER_EFFECTIVE:
-		multiplier = 2.0
-	elif damage_type == DamageType.INEFFECTIVE:
-		multiplier = 0.5
+	#if chip != null:
+		#multiplier = chip.get_damage_multiplier(self)
+	#elif damage_type == DamageType.SUPER_EFFECTIVE:
+		#multiplier = 2.0
+	#elif damage_type == DamageType.INEFFECTIVE:
+		#multiplier = 0.5
 
 	var final_damage: int = int(amount * multiplier)
 	hp -= final_damage
@@ -105,28 +105,29 @@ func take_damage(amount: int, damage_type: DamageType = DamageType.NEUTRAL, chip
 		hp = 0
 		die()
 		
-func play_hurt():
-	if is_dead or is_hurt:
-		return
+#func play_hurt():
+	#if is_dead or is_hurt:
+		#return
+#
+	#if sprite == null:
+		#return
+#
+	#is_hurt = true
+#
+	#sprite.modulate = Color(1, 0.3, 0.3)
+#
+	#if sprite.sprite_frames.has_animation("Hurt"):
+		#sprite.play("Hurt")
+#
+	#await get_tree().create_timer(0.15).timeout
+#
+	#sprite.modulate = Color.WHITE
+#
+	#if sprite.sprite_frames.has_animation("Idle"):
+		#sprite.play("Idle")
+#
+	#is_hurt = false
 
-	if sprite == null:
-		return
-
-	is_hurt = true
-
-	sprite.modulate = Color(1, 0.3, 0.3)
-
-	if sprite.sprite_frames.has_animation("Hurt"):
-		sprite.play("Hurt")
-
-	await get_tree().create_timer(0.15).timeout
-
-	sprite.modulate = Color.WHITE
-
-	if sprite.sprite_frames.has_animation("Idle"):
-		sprite.play("Idle")
-
-	is_hurt = false
 # ============================================================
 # HEALING
 # ============================================================
