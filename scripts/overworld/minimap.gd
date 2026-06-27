@@ -255,4 +255,3 @@ func _open_world_map() -> void:
 		map_container.mouse_filter = Control.MOUSE_FILTER_STOP
 		map_container.set_process_input(true)
 	world_map_ui.set_process(true)
-
