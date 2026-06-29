@@ -10,6 +10,8 @@ const PATCH_PROJECTILE = preload("uid://sv6571ybegto")
 const DELETE_PROJECTILE = preload("uid://cxcsd36elkqlv")
 const FIREWALL = preload("uid://x8y5dkw5aur6")
 const COMMON_BUG_SCENE = preload("uid://bx0l221gdwc3i")
+const REFORMAT_PROJECTILE = preload("uid://b6jh3cqvs8aej")
+
 
 @onready var grid = $Grid
 @onready var player: Unit = $PlayerCharacter
@@ -25,6 +27,9 @@ var current_chip_index := 0
 var player_chip_index: int = 0
 var turn_locked := false
 var battle_active: bool = false
+var combo_database := ChipComboDatabase.new()
+var combo_mode := false
+var first_combo_chip: Chip = null
 
 signal phase_changed(new_phase: BattlePhase)
 signal player_chip_selected(chip: Chip)
@@ -102,7 +107,9 @@ func _update_ui() -> void:
 		player.get_lives(),
 		player.get_max_lives(),
 		total_hp,
-		total_max
+		total_max,
+		combo_mode,
+		first_combo_chip
 	)
 	
 func spawn_enemy(pos: Vector2i) -> void:
@@ -142,26 +149,100 @@ func _start_preparation_phase() -> void:
 	player_chip_index = 0
 
 	_update_ui()
+	
+func move_cursor_right():
+	if !combo_mode:
+		player_chip_index = (player_chip_index + 1) % player_hand.size()
+		return
 
+	var start = player_chip_index
+
+	while true:
+		player_chip_index = (player_chip_index + 1) % player_hand.size()
+
+		if first_combo_chip.can_combine_with(player_hand[player_chip_index]):
+			return
+
+		if player_chip_index == start:
+			return
+
+func move_cursor_left():
+	if !combo_mode:
+		player_chip_index = (player_chip_index - 1 + player_hand.size()) % player_hand.size()
+		return
+
+	var start = player_chip_index
+
+	while true:
+		player_chip_index = (player_chip_index - 1 + player_hand.size()) % player_hand.size()
+
+		if first_combo_chip.can_combine_with(player_hand[player_chip_index]):
+			return
+
+		if player_chip_index == start:
+			return
+			
 func _handle_preparation_input() -> void:
 	if player_hand.is_empty():
 		return
 
+	# ----------------------------------
+	# Move Cursor
+	# ----------------------------------
 	if Input.is_action_just_pressed("ui_right"):
-		player_chip_index = (player_chip_index + 1) % player_hand.size()
+		move_cursor_right()
+		_update_ui()
 
 	if Input.is_action_just_pressed("ui_left"):
-		player_chip_index = (player_chip_index - 1 + player_hand.size()) % player_hand.size()
+		move_cursor_left()
+		_update_ui()
+	# ----------------------------------
+	# Cancel Combo Mode
+	# ----------------------------------
+	if Input.is_action_just_pressed("ui_cancel") and combo_mode:
+		combo_mode = false
+		first_combo_chip = null
+		_update_ui()
+		return
 
+	# ----------------------------------
+	# SPACE = Normal Chip Selection
+	# ----------------------------------
 	if Input.is_action_just_pressed("ui_accept"):
 		var chip = player_hand[player_chip_index]
 
-		selected_chips.append(chip)
+		# Finish combo if we're in combo mode
+		if combo_mode:
 
-		# Remove only from the current hand
-		player_hand.remove_at(player_chip_index)
+			if chip == first_combo_chip:
+				return
 
-		# Keep cursor valid
+			if !first_combo_chip.can_combine_with(chip):
+				print("Cannot combine.")
+				return
+
+			var combo = combo_database.get_combo(first_combo_chip, chip)
+
+			if combo == null:
+				print("No combo exists.")
+				return
+
+			player_hand.erase(first_combo_chip)
+			player_hand.erase(chip)
+
+			selected_chips.append(combo)
+
+			print(combo.name, " created!")
+
+			combo_mode = false
+			first_combo_chip = null
+
+		# Normal chip selection
+		else:
+
+			selected_chips.append(chip)
+			player_hand.remove_at(player_chip_index)
+
 		if player_hand.is_empty():
 			player_chip_index = 0
 		else:
@@ -170,8 +251,37 @@ func _handle_preparation_input() -> void:
 		if selected_chips.size() >= max_selected_chips:
 			_start_battle_phase()
 
-	_update_ui()
+		_update_ui()
+		return
 
+	# ----------------------------------
+	# ENTER = Combo Selection
+	# ----------------------------------
+	if Input.is_action_just_pressed("combo_select"):
+
+		var chip = player_hand[player_chip_index]
+
+		if chip.combo_with.is_empty():
+			print("This chip cannot combine.")
+			return
+
+		first_combo_chip = chip
+		combo_mode = true
+
+		print("Choose another chip to combine with ", chip.name)
+
+		_update_ui()
+		return
+	
+func can_select_chip(chip: Chip) -> bool:
+	if !combo_mode:
+		return true
+
+	if chip == first_combo_chip:
+		return false
+
+	return first_combo_chip.can_combine_with(chip)
+	
 # ============================================================
 # BATTLE PHASE
 # ============================================================
@@ -199,7 +309,7 @@ func _handle_battle_input() -> void:
 	if current_chip_index >= selected_chips.size():
 		return
 
-	if Input.is_action_just_pressed("ui_accept"):
+	if Input.is_action_just_pressed("select"):
 
 		player_attack_locked = true
 
@@ -245,6 +355,9 @@ func use_chip(chip: Chip):
 			
 		Chip.AttackType.BUFF:
 			use_optimize(chip)
+			
+		Chip.AttackType.COMBO:
+			use_reformat(chip)
 # ============================================================
 # ROUND MANAGEMENT
 # ============================================================
@@ -345,6 +458,21 @@ func use_firewall(chip: Chip):
 	
 func _on_firewall_destroyed(tile: Vector2i):
 	blocked_tiles.erase(tile)
+
+func use_reformat(chip: Chip):
+
+	var projectile = REFORMAT_PROJECTILE.instantiate()
+
+	get_tree().current_scene.add_child(projectile)
+
+	projectile.global_position = player_muzzle.global_position
+	projectile.direction = Vector2.RIGHT
+
+	projectile.damage = chip.power
+	projectile.chip = chip
+
+	print("REFORMAT used!")
+
 # ============================================================
 # DEATH / END BATTLE
 # ============================================================

@@ -18,7 +18,8 @@ func _initialize_deck() -> void:
 				999,
 				"Forcefully terminates a target process and purges it from active system memory.",
 				Chip.AttackType.PROJECTILE,
-				{}
+				{},
+				["DELETE"]
 			)
 		)
 
