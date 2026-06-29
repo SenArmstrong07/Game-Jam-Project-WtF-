@@ -1,7 +1,7 @@
 extends Area2D
 
 var damage: int = 10
-var owner: Unit
+var source_unit: Unit
 var lifetime := 0.1
 
 func _ready():
@@ -11,7 +11,7 @@ func _ready():
 	queue_free()
 
 func _on_body_entered(body):
-	if body == owner:
+	if body == source_unit:
 		return
 
 	if body is Unit:
