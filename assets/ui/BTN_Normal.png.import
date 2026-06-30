@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dblis7rm3n66x"
-path="res://.godot/imported/Coupon by craftpix.pdf.png-68e7b3543fad02e2d3980226b88af1ba.ctex"
+uid="uid://dolq1dercip4d"
+path="res://.godot/imported/BTN_Normal.png-695e01750743829c813cd516deb32902.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/craftpix-net-894687-free-gui-for-cyberpunk-pixel-art/Coupon by craftpix.pdf.png"
-dest_files=["res://.godot/imported/Coupon by craftpix.pdf.png-68e7b3543fad02e2d3980226b88af1ba.ctex"]
+source_file="res://assets/ui/BTN_Normal.png"
+dest_files=["res://.godot/imported/BTN_Normal.png-695e01750743829c813cd516deb32902.ctex"]
 
 [params]
 
