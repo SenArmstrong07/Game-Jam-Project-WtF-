@@ -29,12 +29,12 @@ func set_grid_pos(pos: Vector2i) -> void:
 # ============================================================
 # STATS
 # ============================================================
-var hp: int = 100
-var max_hp: int = 100
+@export var max_hp: int = 100
+@export var attack_power: int = 10
+@export var attack_range: int = 4
+@export var attack_cooldown: float = 1.0
 
-var attack_power: int = 10
-var attack_range: int = 4
-var attack_cooldown: float = 1.0
+var hp: int
 var attack_damage_type: DamageType = DamageType.NEUTRAL
 
 var dmg_eff: Array[DamageType] = []
@@ -44,7 +44,8 @@ func _ready():
 
 	if sprite == null:
 		push_error(name + " is missing an AnimatedSprite2D")
-		
+
+	hp = max_hp
 # ============================================================
 # DAMAGE TYPES
 # ============================================================

@@ -6,6 +6,9 @@ const DELETE_PROJECTILE = preload("uid://cxcsd36elkqlv")
 @onready var battle_scene = get_parent()
 @export var hurt_duration := 0.2
 
+var stunned := false
+var stun_timer := 0.0
+
 const GRID_WIDTH := 8
 const GRID_HEIGHT := 4
 const TILE_SIZE := 64
@@ -285,3 +288,24 @@ func stop_optimize_effect():
 	optimize_particles.emitting = false
 
 	anim_player.modulate = Color.WHITE
+
+func apply_stun(duration: float):
+
+	if stunned:
+		return
+
+	stunned = true
+	movement_locked = true
+
+	anim_player.modulate = Color.YELLOW
+
+	print("PLAYER STUNNED")
+
+	await get_tree().create_timer(duration).timeout
+
+	stunned = false
+	movement_locked = false
+
+	anim_player.modulate = Color.WHITE
+
+	print("PLAYER RECOVERED")

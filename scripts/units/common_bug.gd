@@ -20,10 +20,10 @@ var original_modulate := Color.WHITE
 var movement_locked := false
 
 var follow_timer := 0.0
-var follow_interval := 0.5
+var follow_interval := 0.25
 
 var shoot_timer := 0.0
-var shoot_interval := 1.0
+var shoot_interval := 0.75
 
 var stunned := false
 var stun_timer := 0.0

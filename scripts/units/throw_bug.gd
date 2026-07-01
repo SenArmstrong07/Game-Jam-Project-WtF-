@@ -14,13 +14,13 @@ const TILE_SIZE := 64
 
 var target_position := Vector2.ZERO
 var attack_locked := false
-@export var attack_recovery := 0.8
+@export var attack_recovery := 0.25
 var stun_tween: Tween
 var original_modulate := Color.WHITE
 var movement_locked := false
 
 var follow_timer := 0.0
-var follow_interval := 0.5
+var follow_interval := 0.25
 
 var shoot_timer := 0.0
 var shoot_interval := 1.0

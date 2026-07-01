@@ -1,0 +1,101 @@
+[gd_scene format=3 uid="uid://byhjd0o6svh3m"]
+
+[ext_resource type="Script" uid="uid://bsccs5bu4nmyc" path="res://scripts/units/spaghetti_code.gd" id="1_vww3g"]
+[ext_resource type="Texture2D" uid="uid://w8pwuvaijk64" path="res://assets/characters/Glacier_Man_Asset_Pack/Glacier_Man_Enemies/PNG/Walrus_Bot.png" id="2_lacfg"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dh1tq"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(0, 0, 64, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hwwkw"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(64, 0, 64, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jnw5q"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(128, 0, 64, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5xggc"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(192, 0, 64, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_udw15"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(256, 0, 64, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_feq7x"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(256, 0, 64, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hxqka"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(320, 0, 64, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agd3e"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(384, 0, 64, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a4rul"]
+atlas = ExtResource("2_lacfg")
+region = Rect2(448, 0, 64, 40)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7nrbm"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dh1tq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hwwkw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jnw5q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5xggc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_udw15")
+}],
+"loop": 1,
+"name": &"ATTACK",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_feq7x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hxqka")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_agd3e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a4rul")
+}],
+"loop": 1,
+"name": &"IDLE",
+"speed": 7.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cq3a5"]
+height = 96.0
+
+[node name="Spaghetti_Code" type="CharacterBody2D" unique_id=1634237707]
+script = ExtResource("1_vww3g")
+
+[node name="BossSC_Sprite" type="AnimatedSprite2D" parent="." unique_id=815644950]
+position = Vector2(17.999996, -66)
+scale = Vector2(2.5156248, 2.6750002)
+sprite_frames = SubResource("SpriteFrames_7nrbm")
+animation = &"ATTACK"
+autoplay = "IDLE"
+frame_progress = 0.11680037
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=715328508]
+position = Vector2(-30, -66)
+shape = SubResource("CapsuleShape2D_cq3a5")
+
+[node name="BossMarker2D" type="Marker2D" parent="." unique_id=719587077]
+position = Vector2(-41, -82)

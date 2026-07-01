@@ -28,7 +28,7 @@ func _initialize_deck() -> void:
 		deck.append(
 			Chip.new(
 				"Patch",
-				25,
+				15,
 				999,
 				"Deploys a security patch that auto-routes toward detected vulnerabilities in the system.",
 				Chip.AttackType.HOMING,
@@ -43,7 +43,7 @@ func _initialize_deck() -> void:
 		deck.append(
 			Chip.new(
 				"Quarantine",
-				10,
+				5,
 				999,
 				"Isolates malicious threads and temporarily suspends their execution cycle.",
 				Chip.AttackType.STUN_PROJECTILE,

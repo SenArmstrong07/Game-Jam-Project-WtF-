@@ -122,10 +122,16 @@ func spawn_enemy(pos: Vector2i) -> void:
 	e.add_to_group("enemies")
 	e.init(pos)
 
+	# =========================
+	# SET ENEMY STATS HERE
+	# =========================
+	e.max_hp = 100
+
+	e.hp = e.max_hp
+
 	enemies.append(e)
 	occupied_tiles[pos] = true
 
-	# IMPORTANT SAFETY
 	if not e.unit_died.is_connected(_on_unit_died):
 		e.unit_died.connect(_on_unit_died)
 	
