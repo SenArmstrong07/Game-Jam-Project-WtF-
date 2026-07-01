@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://b6oe25yx1mgl3"]
+
+[ext_resource type="Texture2D" uid="uid://cppdtlfoweu1a" path="res://assets/characters/Glacier_Man_Asset_Pack/Items/PNG/Large_Health_Drop.png" id="1_mo8un"]
+[ext_resource type="Script" uid="uid://d1t8ga115njfd" path="res://scripts/manager/trojan_throwable.gd" id="1_ylc7g"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ylc7g"]
+atlas = ExtResource("1_mo8un")
+region = Rect2(0, 0, 8, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hxek2"]
+atlas = ExtResource("1_mo8un")
+region = Rect2(8, 0, 8, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w20ub"]
+atlas = ExtResource("1_mo8un")
+region = Rect2(16, 0, 8, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3tgcn"]
+atlas = ExtResource("1_mo8un")
+region = Rect2(24, 0, 8, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7nrbm"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ylc7g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hxek2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w20ub")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3tgcn")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1y54r"]
+radius = 8.0
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_hxek2"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 30.652
+initial_velocity_min = 500.0
+initial_velocity_max = 700.0
+gravity = Vector3(0, 1200, 0)
+damping_min = 5.0
+damping_max = 10.0
+scale_min = 2.0
+scale_max = 2.0
+
+[node name="TrojanThrowable" type="Area2D" unique_id=181209991]
+collision_layer = 2
+collision_mask = 2
+script = ExtResource("1_ylc7g")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=965296656]
+position = Vector2(0, -1)
+scale = Vector2(4.5, 3)
+sprite_frames = SubResource("SpriteFrames_7nrbm")
+frame_progress = 0.6061541
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=815551253]
+position = Vector2(0, -5)
+shape = SubResource("CircleShape2D_1y54r")
+
+[node name="Sparks" type="GPUParticles2D" parent="." unique_id=776193146]
+emitting = false
+amount = 40
+lifetime = 0.18000000000000002
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_hxek2")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
