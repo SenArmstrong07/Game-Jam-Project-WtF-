@@ -208,3 +208,11 @@ frame_progress = 0.8977252
 
 [node name="HitPoint" type="Marker2D" parent="." unique_id=1919250889]
 position = Vector2(-24, -32)
+
+[node name="HPLabel" type="Label" parent="." unique_id=2137481694]
+texture_filter = 1
+offset_left = 16.0
+offset_top = -73.0
+offset_right = 56.0
+offset_bottom = -50.0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)

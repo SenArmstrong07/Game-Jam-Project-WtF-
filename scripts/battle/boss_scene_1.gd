@@ -129,7 +129,7 @@ func spawn_enemy(pos: Vector2i) -> void:
 	e.max_hp = 600
 
 	e.hp = e.max_hp
-
+	e.update_hp_label()
 	enemies.append(e)
 	occupied_tiles[pos] = true
 
