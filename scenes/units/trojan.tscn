@@ -234,3 +234,11 @@ shape = SubResource("RectangleShape2D_qtgru")
 
 [node name="HitPoint" type="Marker2D" parent="." unique_id=270826756]
 position = Vector2(-18, -27)
+
+[node name="HPLabel" type="Label" parent="." unique_id=1683070905]
+texture_filter = 1
+offset_left = 10.0
+offset_top = -66.0
+offset_right = 50.0
+offset_bottom = -43.0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)

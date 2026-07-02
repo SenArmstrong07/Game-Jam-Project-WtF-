@@ -24,6 +24,7 @@ var jumping := false
 
 @export var jump_height := 450.0
 @export var jump_time := 0.45
+@onready var hp_label: Label = $HPLabel
 
 # ============================================================
 # INIT
@@ -354,9 +355,13 @@ func play_hurt():
 		anim_player.play("Idle")
 
 	is_hurt = false
+
+func update_hp_label():
+	hp_label.text = str(hp)
 	
 func take_damage(amount: int, damage_type = DamageType.NEUTRAL, chip = null):
 	super.take_damage(amount, damage_type, chip)
 
+	update_hp_label()
 	if not is_dead:
 		play_hurt()

@@ -16,6 +16,8 @@ const TILE_SIZE := 64
 var target_position := Vector2.ZERO
 var attack_locked := false
 @export var attack_recovery := 0.25
+@onready var hp_label: Label = $HPLabel
+
 var stun_tween: Tween
 var original_modulate := Color.WHITE
 var movement_locked := false
@@ -42,6 +44,9 @@ func _ready():
 	z_index = 10
 	team = Team.ENEMY
 	add_to_group("enemies")
+	
+	update_hp_label()
+
 
 func init(pos: Vector2i) -> void:
 	grid_pos = pos
@@ -319,9 +324,13 @@ func play_hurt():
 
 	is_hurt = false
 
+func update_hp_label():
+	hp_label.text = str(hp)
+	
 func take_damage(amount: int, damage_type = DamageType.NEUTRAL, chip = null):
 	super.take_damage(amount, damage_type, chip)
-
+	
+	update_hp_label()
 	if not is_dead:
 		play_hurt()
 
