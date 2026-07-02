@@ -228,45 +228,30 @@ func show_tile_warning(tile_pos: Vector2):
 # ============================================================
 # MOVEMENT
 # ============================================================
-
 func bounce_to_tile(target_pos: Vector2, arc_height: float, duration: float) -> void:
-
 	var start_pos = global_position
 	var elapsed := 0.0
 
 	while elapsed < duration:
-<<<<<<< Updated upstream
-
-		await get_tree().create_timer(0.0).timeout
-=======
 		if !is_inside_tree():
 			return
 
 		var tree: SceneTree = get_tree()
-
 		if tree == null:
 			return
 
 		await tree.process_frame
 
->>>>>>> Stashed changes
 		elapsed += get_process_delta_time()
 
 		var t: float = clamp(elapsed / duration, 0.0, 1.0)
 
 		global_position = start_pos.lerp(target_pos, t)
+		global_position.y -= sin(t * PI) * arc_height
 
-		var arc = sin(t * PI) * arc_height
-		global_position.y -= arc
-
-<<<<<<< Updated upstream
-	global_position = target_pos
-
-=======
 	if is_inside_tree():
 		global_position = target_pos
-		
->>>>>>> Stashed changes
+	
 # ============================================================
 # CLEANUP
 # ============================================================
