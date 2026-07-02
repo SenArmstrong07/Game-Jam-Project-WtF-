@@ -100,11 +100,20 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_uhn2s")
 
+[node name="RAM RANCH" type="Label" parent="." unique_id=1971047319]
+offset_left = 279.0
+offset_top = 75.0
+offset_right = 876.0
+offset_bottom = 181.0
+theme_override_fonts/font = ExtResource("4_4rgdw")
+theme_override_font_sizes/font_size = 120
+text = "RAM RANCH"
+
 [node name="ColorRect" type="ColorRect" parent="." unique_id=943737120]
-offset_left = -265.0
-offset_top = -169.0
-offset_right = 1492.0
-offset_bottom = 917.0
+offset_left = -263.0
+offset_top = -231.0
+offset_right = 1494.0
+offset_bottom = 855.0
 color = Color(0, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2085920688]
