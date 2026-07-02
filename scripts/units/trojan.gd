@@ -96,18 +96,6 @@ func _process(delta):
 	follow_timer += delta
 	shoot_timer += delta
 
-	# Don't choose a new move while locked
-	if !movement_locked and !moving and follow_timer >= follow_interval:
-		follow_timer = 0.0
-		random_move()
-
-	# Don't start another attack while attacking
-	if !attack_locked and shoot_timer >= shoot_interval:
-		shoot_timer = 0.0
-
-		if can_shoot_player():
-			perform_attack()
-
 	# ==========================================
 	# Movement
 	# ==========================================
@@ -123,6 +111,7 @@ func _process(delta):
 
 		if can_shoot_player():
 			perform_attack()
+
 # ============================================================
 # CORE MOVEMENT (LANE CONTROL AI)
 # ============================================================
@@ -142,7 +131,16 @@ func move_to_player():
 	grid_pos = target
 	target_position = grid_to_world(target)
 
+	var timeout := 2.0
+
 	while position.distance_to(target_position) > 2.0:
+		if !is_inside_tree():
+			return
+
+		timeout -= get_process_delta_time()
+		if timeout <= 0.0:
+			break	
+
 		await get_tree().process_frame
 
 	position = target_position
@@ -189,7 +187,7 @@ func random_move():
 			return	
 	
 func perform_attack():
-
+	print("Attack start")
 	if attack_locked:
 		return
 
@@ -203,13 +201,12 @@ func perform_attack():
 	else:
 		shoot_projectile()
 
-	await get_tree().create_timer(attack_recovery).timeout
+	if is_inside_tree():
+		await get_tree().create_timer(attack_recovery).timeout
 
-	_unlock_attack()
-
-func _unlock_attack():
 	attack_locked = false
 	movement_locked = false
+	print("Attack end")
 # ============================================================
 # SHOOT LOGIC
 # ============================================================
@@ -295,7 +292,10 @@ func throw_trap():
 # STUN
 # ============================================================
 func _on_player_stunned(tile: Vector2i):
-
+	
+	if attack_locked:
+		return
+		
 	movement_locked = true
 
 	await move_to_player()
