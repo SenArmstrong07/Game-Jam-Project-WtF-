@@ -117,39 +117,33 @@ func _process(delta):
 # ============================================================
 # CORE MOVEMENT (LANE CONTROL AI)
 # ============================================================
-func move_to_player():
+func move_to_player(target_tile: Vector2i) -> bool:
 
-	if player_character == null:
-		return
-
-	var target := player_character.grid_pos + Vector2i.RIGHT
+	var target := target_tile + Vector2i.RIGHT
 
 	if !battle_scene.is_tile_free(target):
-		return
+		return false
+
+	moving = true
+	movement_locked = true
 
 	battle_scene.occupied_tiles.erase(grid_pos)
 	battle_scene.occupied_tiles[target] = true
 
-	grid_pos = target
 	target_position = grid_to_world(target)
 
-	var timeout := 2.0
-
 	while position.distance_to(target_position) > 2.0:
-		if !is_inside_tree():
-			return
-
-		timeout -= get_process_delta_time()
-		if timeout <= 0.0:
-			break	
-
 		await get_tree().process_frame
 
 	position = target_position
-		
+	grid_pos = target
+	moving = false
+
+	return true
+			
 func random_move():
 
-	if moving:
+	if moving or movement_locked:
 		return
 
 	var old_grid_pos = grid_pos
@@ -294,13 +288,14 @@ func throw_trap():
 # STUN
 # ============================================================
 func _on_player_stunned(tile: Vector2i):
-	
+
 	if attack_locked:
 		return
-		
-	movement_locked = true
 
-	await move_to_player()
+	var reached := await move_to_player(tile)
+
+	if !reached:
+		return
 
 	shoot_projectile()
 
@@ -309,7 +304,7 @@ func _on_player_stunned(tile: Vector2i):
 	shoot_projectile()
 
 	movement_locked = false
-
+		
 func apply_stun(duration: float):
 	print(name, " STUNNED for ", duration)
 
